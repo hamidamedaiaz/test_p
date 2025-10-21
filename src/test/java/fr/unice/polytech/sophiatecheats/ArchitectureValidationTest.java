@@ -38,7 +38,14 @@ class ArchitectureValidationTest {
     // Given
     SophiaTechEatsApplication app = new SophiaTechEatsApplication();
 
-    // When & Then - Should not throw any exception
+    // When
     app.run();
+
+    // Then
+    // Ensure the application bootstrapped correctly
+    assertThat(app.getConfig())
+            .as("ApplicationConfig should be initialized after running the app")
+            .isNotNull();
   }
+
 }

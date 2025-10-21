@@ -158,6 +158,7 @@ public class InMemoryRestaurantRepository extends InMemoryRepository<Restaurant,
     @Override
     public Restaurant save(Restaurant restaurant) {
         isDuplicate(restaurant, restaurants);
+        storage.put(restaurant.getId(), restaurant);
         return restaurant;
     }
 
@@ -198,4 +199,10 @@ public class InMemoryRestaurantRepository extends InMemoryRepository<Restaurant,
         restaurants.remove(restaurant.getId());
     }
 
+    public Restaurant findByName(String name) {
+        return restaurants.values().stream()
+                .filter(r -> r.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+    }
 }

@@ -368,10 +368,9 @@ class RestaurantTest {
     @Test
     void shouldGenerateDeliverySlots() {
         Restaurant restaurant = new Restaurant("Test", "Address");
-
-        restaurant.getDeliverySchedule().generateDailySlots(
-                LocalDate.now().plusDays(1), LocalTime.of(8, 0), LocalTime.of(20, 30), 10
-        );
+        Schedule schedule = new Schedule(LocalTime.of(8, 0), LocalTime.of(20, 0));
+        restaurant.setSchedule(schedule.openingTime(), schedule.closingTime());
+        restaurant.getDeliverySchedule().generateDailySlots(LocalDate.now().plusDays(1), schedule, 15);
 
         List<TimeSlot> slots = restaurant.getDeliverySchedule().getAvailableSlotsForDate(LocalDate.now().plusDays(1));
         assertFalse(slots.isEmpty());
@@ -383,8 +382,8 @@ class RestaurantTest {
         Restaurant restaurant2 = new Restaurant("Test2", "Address2");
 
         assertNotEquals(restaurant1, restaurant2);
-        assertNotEquals(restaurant1, null);
-        assertNotEquals(restaurant1, "not a restaurant");
+        assertNotEquals(null, restaurant1);
+        assertNotEquals("not a restaurant", restaurant1);
     }
 
     @Test
@@ -460,9 +459,10 @@ class RestaurantTest {
     @Test
     void shouldReserveAndReleaseDeliverySlots() {
         Restaurant restaurant = new Restaurant("Test", "Address");
-        restaurant.getDeliverySchedule().generateDailySlots(
-                LocalDate.now().plusDays(1), LocalTime.of(8, 0), LocalTime.of(20, 0), 5
-        );
+        Schedule schedule = new Schedule(LocalTime.of(8, 0), LocalTime.of(20, 0));
+        restaurant.setSchedule(schedule.openingTime(), schedule.closingTime());
+        restaurant.getDeliverySchedule().generateDailySlots(LocalDate.now().plusDays(1), schedule, 15);
+
 
         List<TimeSlot> slots = restaurant.getDeliverySchedule().getAvailableSlotsForDate(LocalDate.now().plusDays(1));
         assertFalse(slots.isEmpty());

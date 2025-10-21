@@ -4,7 +4,6 @@ import fr.unice.polytech.sophiatecheats.domain.entities.cart.Cart;
 import fr.unice.polytech.sophiatecheats.domain.entities.cart.CartItem;
 import fr.unice.polytech.sophiatecheats.domain.entities.restaurant.Dish;
 import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
-import fr.unice.polytech.sophiatecheats.domain.exceptions.ValidationException;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.InvalidCartOperationException;
 import io.cucumber.java.en.*;
 
@@ -176,31 +175,6 @@ public class CartStepDefinitions {
         dishMap.put(dishName, unavailableDish);
     }
 
-    @When("I add {int} {string} to my cart")
-    public void i_add_dish_to_my_cart(int quantity, String dishName) {
-        try {
-            Dish dish = dishMap.get(dishName);
-            if (dish == null) {
-                // Create a default dish if not found in map
-                dish = Dish.builder()
-                    .id(UUID.randomUUID())
-                    .name(dishName)
-                    .description("Description")
-                    .price(new BigDecimal("10.0"))
-                    .category(DishCategory.MAIN_COURSE)
-                    .available(true)
-                    .build();
-                dishMap.put(dishName, dish);
-            }
-            cart.addDish(dish, quantity);
-            lastError = null;
-            lastException = null;
-        } catch (Exception e) {
-            lastError = e.getMessage();
-            lastException = e;
-        }
-    }
-
     // US #104 - Enhanced error handling for "try to add" scenarios
     @When("I try to add {int} {string} to my cart")
     public void i_try_to_add_to_my_cart(Integer quantity, String dishName) {
@@ -347,21 +321,6 @@ public class CartStepDefinitions {
         }
     }
 
-    @When("I update the quantity of {string} to {int}")
-    public void i_update_the_quantity_of_dish_to(String dishName, int quantity) {
-        try {
-            Dish dish = dishMap.get(dishName);
-            if (dish != null) {
-                cart.updateQuantity(dish.getId(), quantity);
-            }
-            lastError = null;
-            lastException = null;
-        } catch (Exception e) {
-            lastError = e.getMessage();
-            lastException = e;
-        }
-    }
-
     @When("I try to update the quantity of {string} to {int}")
     public void i_try_to_update_the_quantity_of_dish_to(String dishName, int quantity) {
         try {
@@ -388,11 +347,6 @@ public class CartStepDefinitions {
         cart.clear();
     }
 
-    @Then("my cart should contain {int} items")
-    public void my_cart_should_contain_items(int expectedItemCount) {
-        assertEquals(expectedItemCount, cart.getItems().size());
-    }
-
     // Nouveau step definition pour "my cart should contain X item" (singulier)
     @Then("my cart should contain {int} item")
     public void my_cart_should_contain_item(Integer expectedItemCount) {
@@ -408,12 +362,6 @@ public class CartStepDefinitions {
     @Then("my cart should remain empty")
     public void my_cart_should_remain_empty() {
         assertTrue(cart.isEmpty());
-    }
-
-    @Then("the total price should be {string}")
-    public void the_total_price_should_be(String expectedPrice) {
-        BigDecimal expected = new BigDecimal(expectedPrice);
-        assertEquals(expected, cart.calculateTotal());
     }
 
     @Then("my cart should contain {int} {string}")
@@ -457,12 +405,6 @@ public class CartStepDefinitions {
         assertEquals(1, cart.getItems().size(), "Cart should still contain only 1 item");
     }
 
-    @Then("I should receive an error message {string}")
-    public void i_should_receive_an_error_message(String expectedError) {
-        assertNotNull(lastError, "Expected an error message");
-        assertTrue(lastError.contains(expectedError) || expectedError.contains(lastError));
-    }
-
     // Nouveau step definition pour "I should receive an error X"
     @Then("I should receive an error {string}")
     public void i_should_receive_an_error(String expectedError) {
@@ -479,16 +421,6 @@ public class CartStepDefinitions {
         assertNotNull(lastError, "Expected an error message about availability");
         assertTrue(lastError.contains("disponible") || lastError.contains("available"),
             "Expected availability error but got: " + lastError);
-    }
-
-    @Then("my cart should not contain {string}")
-    public void my_cart_should_not_contain_dish(String dishName) {
-        Dish dish = dishMap.get(dishName);
-        if (dish != null) {
-            boolean containsDish = cart.getItems().stream()
-                .anyMatch(item -> item.getDishId().equals(dish.getId()));
-            assertFalse(containsDish, "Cart should not contain " + dishName);
-        }
     }
 
     // Nouveaux step definitions pour les détails du panier

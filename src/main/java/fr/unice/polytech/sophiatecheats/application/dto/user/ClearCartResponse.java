@@ -19,15 +19,4 @@ public record ClearCartResponse(UUID cartId, int itemCount, BigDecimal totalAmou
      */
     public ClearCartResponse {
     }
-
-    @Override
-    public String toString() {
-        return "ClearCartResponse{" +
-                "cartId=" + cartId +
-                ", itemCount=" + itemCount +
-                ", totalAmount=" + totalAmount +
-                ", success=" + success +
-                ", message='" + message + '\'' +
-                '}';
-    }
 }

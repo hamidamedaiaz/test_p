@@ -34,7 +34,9 @@ public class AddDishToCartUseCase implements UseCase<AddDishToCartRequest, AddDi
     @Override
     public AddDishToCartResponse execute(AddDishToCartRequest request) {
         try {
+            // Récupérer l'utilisateur (pour vérification et interaction avec le mock)
             User user = validateAndGetUser(request.userId());
+
             Dish dish = validateAndGetDish(request.dishId());
 
             // Trouver le restaurant du plat

@@ -16,6 +16,8 @@ import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMem
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryRestaurantRepository;
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryUserRepository;
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryCartRepository;
+import fr.unice.polytech.sophiatecheats.domain.services.photoai.PhotoAnalysisService;
+import fr.unice.polytech.sophiatecheats.infrastructure.external.MockAIPhotoAnalysisService;
 import org.picocontainer.DefaultPicoContainer;
 import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.behaviors.Caching;
@@ -60,6 +62,7 @@ public class ApplicationConfig {
     container.addComponent(CartRepository.class, InMemoryCartRepository.class);
 
     // Services
+    container.addComponent(PhotoAnalysisService.class, MockAIPhotoAnalysisService.class);
 
     // Use Cases
     container.addComponent(BrowseRestaurantsUseCase.class);
@@ -90,10 +93,4 @@ public class ApplicationConfig {
     return container.getComponent(clazz);
   }
 
-  /**
-   * Enregistre manuellement un composant.
-   */
-  public <T> void registerComponent(Class<T> interfaceClass, Class<? extends T> implementationClass) {
-    container.addComponent(interfaceClass, implementationClass);
-  }
 }

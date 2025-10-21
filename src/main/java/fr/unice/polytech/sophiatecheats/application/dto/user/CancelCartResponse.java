@@ -14,14 +14,5 @@ public record CancelCartResponse(UUID cancelledCartId, boolean success, String m
      */
     public CancelCartResponse {
     }
-
-    @Override
-    public String toString() {
-        return "CancelCartResponse{" +
-                "cancelledCartId=" + cancelledCartId +
-                ", success=" + success +
-                ", message='" + message + '\'' +
-                '}';
-    }
 }
 

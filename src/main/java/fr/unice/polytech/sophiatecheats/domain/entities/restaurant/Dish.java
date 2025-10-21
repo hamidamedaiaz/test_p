@@ -32,7 +32,6 @@ public class Dish implements Entity<UUID>{
 
 
 
-    // CONSTRUCTEUR PRIVÉ - Utiliser le Builder pour créer des instances
     private Dish(Builder builder) {
         this.id = builder.id;
         this.name = builder.name;

@@ -26,7 +26,7 @@ public record UpdateDishRequest(
             throw new IllegalArgumentException("L'ID du plat ne peut pas être null");
         }
         // Validation conditionnelle des nouveaux champs
-        if (newName != null && newName.trim().isEmpty()) {
+        if (newName == null || newName.trim().isEmpty()) {
             throw new IllegalArgumentException("Le nouveau nom du plat ne peut pas être vide");
         }
         if (newPrice != null && newPrice.compareTo(BigDecimal.ZERO) < 0) {

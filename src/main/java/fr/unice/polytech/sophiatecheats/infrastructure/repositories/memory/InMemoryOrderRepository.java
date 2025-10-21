@@ -22,7 +22,7 @@ public class InMemoryOrderRepository extends InMemoryRepository<Order, String> i
     public boolean existsActiveOrderByUserId(UUID userId) {
         for (Order order : storage.values()) {
             if (order.getUser().getId().equals(userId) &&
-                (order.getStatus() == OrderStatus.PENDING || order.getStatus() == OrderStatus.PAID)) {
+                    (order.getStatus() == OrderStatus.PENDING || order.getStatus() == OrderStatus.CREATED || order.getStatus() == OrderStatus.PAID)) {
                 return true;
             }
         }

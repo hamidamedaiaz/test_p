@@ -62,10 +62,11 @@ class TimeSlotUseCasesTest {
         UUID slotId = UUID.randomUUID();
         TimeSlot slot = new TimeSlot(slotId, restaurantId,
                 LocalDateTime.now(), LocalDateTime.now().plusMinutes(30), 2);
+        SelectDeliverySlotUseCase.Input input = new SelectDeliverySlotUseCase.Input(slotId, today);
 
         when(deliveryService.getAvailableSlots(today)).thenReturn(List.of(slot));
 
-        boolean ok = selectSlotUC.execute(slotId, today);
+        boolean ok = selectSlotUC.execute(input);
 
         assertTrue(ok, "Le créneau devrait être sélectionnable");
         verify(deliveryService).getAvailableSlots(today);
@@ -75,10 +76,11 @@ class TimeSlotUseCasesTest {
     void testSelectDeliverySlotReturnsFalseWhenNotAvailable() {
         LocalDate today = LocalDate.now();
         UUID slotId = UUID.randomUUID();
+        SelectDeliverySlotUseCase.Input input = new SelectDeliverySlotUseCase.Input(slotId, today);
 
         when(deliveryService.getAvailableSlots(today)).thenReturn(List.of());
 
-        boolean ok = selectSlotUC.execute(slotId, today);
+        boolean ok = selectSlotUC.execute(input);
         assertFalse(ok, "Le créneau devrait être indisponible");
     }
 
@@ -87,11 +89,12 @@ class TimeSlotUseCasesTest {
         LocalDate today = LocalDate.now();
         UUID slotId = UUID.randomUUID();
         TimeSlot slot = new TimeSlot(slotId, restaurantId,
-                LocalDateTime.now(), LocalDateTime.now().plusMinutes(30), 5);
+                LocalDateTime.now(), LocalDateTime.now().plusMinutes(30), 2);
+        ValidateDeliverySlotUseCase.Input input = new ValidateDeliverySlotUseCase.Input(slot.getId(), today);
 
         when(deliveryService.getAvailableSlots(today)).thenReturn(List.of(slot));
 
-        validateSlotUC.execute(slotId, today);
+        validateSlotUC.execute(input);
 
         verify(deliveryService).getAvailableSlots(today);
         verify(deliveryService).reserveSlot(slotId);
@@ -103,8 +106,9 @@ class TimeSlotUseCasesTest {
         UUID slotId = UUID.randomUUID();
 
         when(deliveryService.getAvailableSlots(today)).thenReturn(List.of());
+        ValidateDeliverySlotUseCase.Input input = new ValidateDeliverySlotUseCase.Input(slotId, today);
 
-        assertThrows(SlotNotFoundException.class, () -> validateSlotUC.execute(slotId, today));
+        assertThrows(SlotNotFoundException.class, () -> validateSlotUC.execute(input));
         verify(deliveryService).getAvailableSlots(today);
         verify(deliveryService, never()).reserveSlot(any());
     }

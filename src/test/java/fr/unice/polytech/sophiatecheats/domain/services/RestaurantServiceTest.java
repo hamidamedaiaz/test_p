@@ -6,7 +6,7 @@ import fr.unice.polytech.sophiatecheats.domain.entities.restaurant.Restaurant;
 import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.DuplicateRestaurantException;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.RestaurantNotFoundException;
-import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryTimeSlotRepository;
+import fr.unice.polytech.sophiatecheats.domain.exceptions.RestaurantValidationException;
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryRestaurantRepository;
 import fr.unice.polytech.sophiatecheats.domain.repositories.RestaurantRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,6 @@ import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +40,7 @@ class RestaurantServiceTest {
         String name = "CROUS";
         String address = "Valbonne";
 
-        service.createRestaurant(name, address);
+        Restaurant created = service.createRestaurant(name, address);
 
         ArgumentCaptor<Restaurant> captor = ArgumentCaptor.forClass(Restaurant.class);
         verify(repository, times(1)).save(captor.capture());
@@ -49,12 +48,12 @@ class RestaurantServiceTest {
         Restaurant saved = captor.getValue();
         assertEquals(name, saved.getName());
         assertEquals(address, saved.getAddress());
-        assertNotNull(saved.getId());
+        assertEquals(created.getId(), saved.getId());
     }
 
     @Test
     void testCreateRestaurantWithEmptyNameThrowsException() {
-        assertThrows(RuntimeException.class, () -> service.createRestaurant("", "Nice"));
+        assertThrows(RestaurantValidationException.class, () -> service.createRestaurant("", "Nice"));
         verify(repository, never()).save(any());
     }
 
@@ -94,11 +93,12 @@ class RestaurantServiceTest {
         InMemoryRestaurantRepository repo = new InMemoryRestaurantRepository(false);
         service = new RestaurantService(repo);
 
-        service.createRestaurant("CROUS", "Valbonne");
+        Restaurant created = service.createRestaurant("CROUS", "Valbonne");
 
         Restaurant saved = repo.findAll().getFirst();
         assertEquals("CROUS", saved.getName());
         assertTrue(repo.findById(saved.getId()).isPresent());
+        assertEquals(created.getId(), saved.getId());
     }
 
     @Test
@@ -106,10 +106,11 @@ class RestaurantServiceTest {
         InMemoryRestaurantRepository repo = new InMemoryRestaurantRepository(false);
         service = new RestaurantService(repo);
 
-        service.createRestaurant("CROUS", "Valbonne");
+        Restaurant first = service.createRestaurant("CROUS", "Valbonne");
 
         assertThrows(DuplicateRestaurantException.class, () ->
                 service.createRestaurant("CROUS", "Valbonne"));
+        assertTrue(repo.findById(first.getId()).isPresent());
     }
 
     @Test
@@ -117,8 +118,8 @@ class RestaurantServiceTest {
         InMemoryRestaurantRepository repo = new InMemoryRestaurantRepository(false);
         service = new RestaurantService(repo);
 
-        service.createRestaurant("CROUS", "Valbonne");
-        Restaurant saved = repo.findAll().getFirst();
+        Restaurant created = service.createRestaurant("CROUS", "Valbonne");
+        Restaurant saved = repo.findById(created.getId()).orElseThrow();
 
         service.updateRestaurantName(saved.getId(), "New CROUS");
 
@@ -132,8 +133,8 @@ class RestaurantServiceTest {
         InMemoryRestaurantRepository repo = new InMemoryRestaurantRepository(false);
         service = new RestaurantService(repo);
 
-        service.createRestaurant("CROUS", "Valbonne");
-        Restaurant saved = repo.findAll().getFirst();
+        Restaurant created = service.createRestaurant("CROUS", "Valbonne");
+        Restaurant saved = repo.findById(created.getId()).orElseThrow();
 
         service.updateRestaurantAddress(saved.getId(), "Nice");
 
@@ -150,8 +151,8 @@ class RestaurantServiceTest {
         service.createRestaurant("CROUS", "Valbonne");
         Restaurant saved = repo.findAll().getFirst();
 
-        service.updateRestaurantName(saved.getId(), null);
-        service.updateRestaurantName(saved.getId(), "  ");
+        assertThrows(RestaurantValidationException.class, () -> service.updateRestaurantName(saved.getId(), null));
+        assertThrows(RestaurantValidationException.class, () -> service.updateRestaurantName(saved.getId(), "  "));
 
         Restaurant updated = repo.findById(saved.getId()).orElseThrow();
         assertEquals("CROUS", updated.getName());
@@ -165,7 +166,7 @@ class RestaurantServiceTest {
         service.createRestaurant("CROUS", "Valbonne");
         Restaurant saved = repo.findAll().getFirst();
 
-        service.updateRestaurantAddress(saved.getId(), "");
+        assertThrows(RestaurantValidationException.class, () -> service.updateRestaurantAddress(saved.getId(), ""));
         Restaurant updated = repo.findById(saved.getId()).orElseThrow();
         assertEquals("Valbonne", updated.getAddress());
     }
@@ -251,8 +252,7 @@ class RestaurantServiceTest {
         InMemoryRestaurantRepository repo = new InMemoryRestaurantRepository(false);
         service = new RestaurantService(repo);
 
-        service.createRestaurant("CROUS", "Valbonne");
-        Restaurant r = repo.findAll().getFirst();
+        Restaurant r = service.createRestaurant("CROUS", "Valbonne");
 
         service.addDishToRestaurant(r.getId(), "Pizza", "Delicious", BigDecimal.valueOf(8.5), DishCategory.MAIN_COURSE);
 
@@ -266,8 +266,7 @@ class RestaurantServiceTest {
         InMemoryRestaurantRepository repo = new InMemoryRestaurantRepository(false);
         service = new RestaurantService(repo);
 
-        service.createRestaurant("CROUS", "Valbonne");
-        Restaurant r = repo.findAll().getFirst();
+        Restaurant r = service.createRestaurant("CROUS", "Valbonne");
         service.addDishToRestaurant(r.getId(), "Pizza", "Delicious", BigDecimal.valueOf(8.5), DishCategory.MAIN_COURSE);
         UUID dishId = r.getMenu().get(0).getId();
 

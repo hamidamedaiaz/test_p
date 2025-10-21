@@ -49,9 +49,9 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
     private final CartRepository cartRepository;
 
     public PlaceOrderUseCase(UserRepository userRepository,
-                           RestaurantRepository restaurantRepository,
-                           OrderRepository orderRepository,
-                           CartRepository cartRepository) {
+                             RestaurantRepository restaurantRepository,
+                             OrderRepository orderRepository,
+                             CartRepository cartRepository) {
         this.userRepository = userRepository;
         this.restaurantRepository = restaurantRepository;
         this.orderRepository = orderRepository;
@@ -68,17 +68,17 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
         boolean hasActiveOrder = orderRepository.existsActiveOrderByUserId(request.userId());
         if (hasActiveOrder) {
             throw new ValidationException(
-                "Vous avez déjà une commande en cours. Veuillez attendre qu'elle soit terminée avant d'en créer une nouvelle.");
+                    "Vous avez déjà une commande en cours. Veuillez attendre qu'elle soit terminée avant d'en créer une nouvelle.");
         }
 
         // Récupérer l'utilisateur
         User user = userRepository.findById(request.userId())
-            .orElseThrow(() -> new EntityNotFoundException("User not found: " + request.userId()));
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + request.userId()));
 
         // Récupérer le panier actif de l'utilisateur
         Cart cart = cartRepository.findActiveCartByUserId(request.userId())
-            .orElseThrow(() -> new ValidationException(
-                "Aucun panier actif trouvé. Veuillez d'abord ajouter des plats à votre panier."));
+                .orElseThrow(() -> new ValidationException(
+                        "Aucun panier actif trouvé. Veuillez d'abord ajouter des plats à votre panier."));
 
         // Vérifier que le panier n'est pas vide
         if (cart.isEmpty()) {
@@ -92,7 +92,7 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
 
         // Récupérer le restaurant
         Restaurant restaurant = restaurantRepository.findById(request.restaurantId())
-            .orElseThrow(() -> new EntityNotFoundException("Restaurant not found: " + request.restaurantId()));
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found: " + request.restaurantId()));
 
         // Transformer les CartItems en OrderItems
         List<OrderItem> orderItems = new ArrayList<>();
@@ -101,7 +101,7 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
         for (CartItem cartItem : cart.getItems()) {
             // Récupérer le plat pour créer l'OrderItem
             Dish dish = restaurant.findDishById(cartItem.getDishId())
-                .orElseThrow(() -> new EntityNotFoundException("Dish not found: " + cartItem.getDishId()));
+                    .orElseThrow(() -> new EntityNotFoundException("Dish not found: " + cartItem.getDishId()));
 
             OrderItem orderItem = new OrderItem(dish, cartItem.getQuantity());
             orderItems.add(orderItem);
@@ -115,14 +115,14 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
             // Message d'erreur adapté selon la méthode de paiement
             if (request.paymentMethod() == PaymentMethod.STUDENT_CREDIT) {
                 throw new InsufficientCreditException(
-                    String.format("Crédit étudiant insuffisant. Requis: %.2f€, Disponible: %.2f€",
-                        totalAmount.doubleValue(),
-                        user.getStudentCredit().doubleValue())
+                        String.format("Crédit étudiant insuffisant. Requis: %.2f€, Disponible: %.2f€",
+                                totalAmount.doubleValue(),
+                                user.getStudentCredit().doubleValue())
                 );
             } else {
                 throw new ValidationException(
-                    String.format("Paiement par carte bancaire impossible. Montant: %.2f€",
-                        totalAmount.doubleValue())
+                        String.format("Paiement par carte bancaire impossible. Montant: %.2f€",
+                                totalAmount.doubleValue())
                 );
             }
         }
@@ -134,8 +134,8 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
         if (!paymentResult.success()) {
             throw new ValidationException("Échec du paiement: " + paymentResult.message());
         }
-        
-        
+
+
 
         // Sauvegarder l'utilisateur UNIQUEMENT si le crédit étudiant a été modifié
         // (pas nécessaire pour les paiements externes)
@@ -145,10 +145,10 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
 
         // Créer la commande à partir du panier
         Order order = new Order(
-            user,
-            restaurant,
-            orderItems,
-            request.paymentMethod()
+                user,
+                restaurant,
+                orderItems,
+                request.paymentMethod()
         );
 
         // Marquer automatiquement comme payé pour le crédit étudiant
@@ -163,13 +163,13 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
         cartRepository.delete(cart);
 
         return new PlaceOrderResponse(
-            savedOrder.getOrderId(),
-            savedOrder.getUser().getName(),
-            savedOrder.getRestaurant().getName(),
-            savedOrder.getTotalAmount(),
-            savedOrder.getStatus(),
-            savedOrder.getPaymentMethod(),
-            savedOrder.getOrderDateTime()
+                savedOrder.getOrderId(),
+                savedOrder.getUser().getName(),
+                savedOrder.getRestaurant().getName(),
+                savedOrder.getTotalAmount(),
+                savedOrder.getStatus(),
+                savedOrder.getPaymentMethod(),
+                savedOrder.getOrderDateTime()
         );
     }
 }

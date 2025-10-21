@@ -27,7 +27,7 @@ public class DeliveryService {
         TimeSlot slot = repository.findById(slotId)
                 .orElseThrow(() -> new SlotNotFoundException("Créneau introuvable : " + slotId));
 
-        slot.reserveOrThrow(); // Use the method that throws exceptions
+        slot.reserveOrThrow();
 
         repository.update(slot);
     }
