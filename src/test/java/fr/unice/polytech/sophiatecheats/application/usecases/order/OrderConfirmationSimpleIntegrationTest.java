@@ -70,7 +70,7 @@ class OrderConfirmationSimpleIntegrationTest {
         assertEquals(user.getName(), response.customerName());
         assertEquals(restaurant.getName(), response.restaurantName());
         assertEquals(BigDecimal.valueOf(30.0), response.totalAmount());
-        assertNotNull(response.estimatedDeliveryTime());
+        assertNotNull(response.deliveryTime());
         assertNotNull(response.confirmedAt());
     }
 

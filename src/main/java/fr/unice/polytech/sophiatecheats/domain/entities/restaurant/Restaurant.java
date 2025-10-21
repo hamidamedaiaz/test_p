@@ -256,6 +256,8 @@ public class Restaurant implements Entity<UUID> {
         if (!allowDuplicateNames && menu.stream().anyMatch(existingDish -> existingDish.getName().equals(dish.getName()))) {
             throw new IllegalArgumentException("Un plat avec le nom '" + dish.getName() + "' existe déjà dans le menu");
         }
+        // Assigner l'UUID du restaurant au plat afin que le plat connaisse son propriétaire.
+        dish.setRestaurantId(this.id);
         menu.add(dish);
     }
 
@@ -364,11 +366,11 @@ public class Restaurant implements Entity<UUID> {
     }
 
     public LocalTime getOpeningTime() {
-        return schedule != null ? schedule.getOpeningTime() : null;
+        return schedule != null ? schedule.openingTime() : null;
     }
 
     public LocalTime getClosingTime() {
-        return schedule != null ? schedule.getClosingTime() : null;
+        return schedule != null ? schedule.closingTime() : null;
     }
 
     public void open() {
@@ -379,24 +381,8 @@ public class Restaurant implements Entity<UUID> {
         this.isOpen = false;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
     public List<Dish> getMenu() {
         return new ArrayList<>(menu);
-    }
-
-    public Schedule getSchedule() {
-        return schedule;
-    }
-
-    public DeliverySchedule getDeliverySchedule() {
-        return deliverySchedule;
     }
 
     @Override

@@ -27,7 +27,7 @@ import java.util.UUID;
  * sont levées en cas d’erreur ou de violation de règle fonctionnelle.
  */
 public class RestaurantService {
-    private RestaurantRepository repository;
+    private final RestaurantRepository repository;
 
     public RestaurantService(RestaurantRepository repository) {
         this.repository = repository;

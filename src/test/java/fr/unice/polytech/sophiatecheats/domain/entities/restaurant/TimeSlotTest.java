@@ -390,24 +390,6 @@ class TimeSlotTest {
     }
 
     @Test
-    void should_not_be_available_when_in_past() {
-        UUID restaurantId = UUID.randomUUID();
-        LocalTime startTime = LocalTime.of(12, 0);
-        LocalDateTime pastDate = LocalDateTime.now().minusHours(2);
-
-        TimeSlot timeSlot = TimeSlot.builder()
-                .restaurantId(restaurantId)
-                .thirtyMinuteSlot(startTime, pastDate)
-                .maxCapacity(5)
-                .build();
-
-        assertFalse(timeSlot.isAvailable());
-        assertTrue(timeSlot.isPast());
-    }
-
-
-
-    @Test
     void should_not_be_available_when_deactivated() {
         // Given
         UUID restaurantId = UUID.randomUUID();

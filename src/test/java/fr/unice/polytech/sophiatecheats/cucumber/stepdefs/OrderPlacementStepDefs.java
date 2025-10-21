@@ -189,7 +189,7 @@ public class OrderPlacementStepDefs {
     @And("an estimated delivery time should be set")
     public void an_estimated_delivery_time_should_be_set() {
         assertNotNull(confirmResponse, "Confirm response should exist");
-        assertNotNull(confirmResponse.estimatedDeliveryTime(), "Delivery time should be set");
+        assertNotNull(confirmResponse.deliveryTime(), "Delivery time should be set");
     }
 
     @And("the delivery time should be approximately {int} minutes from confirmation")
@@ -197,7 +197,7 @@ public class OrderPlacementStepDefs {
         assertNotNull(confirmResponse, "Confirm response should exist");
 
         LocalDateTime confirmTime = confirmResponse.confirmedAt();
-        LocalDateTime deliveryTime = confirmResponse.estimatedDeliveryTime();
+        LocalDateTime deliveryTime = confirmResponse.deliveryTime();
 
         long actualMinutes = ChronoUnit.MINUTES.between(confirmTime, deliveryTime);
         assertTrue(Math.abs(actualMinutes - 15) <= 2,
@@ -217,8 +217,7 @@ public class OrderPlacementStepDefs {
     @Then("the system should display an error about insufficient credit")
     public void the_system_should_display_an_error_about_insufficient_credit() {
         assertNotNull(lastException, "An exception should have been thrown");
-        assertTrue(lastException instanceof InsufficientCreditException,
-            "Exception should be InsufficientCreditException");
+        assertInstanceOf(InsufficientCreditException.class, lastException, "Exception should be InsufficientCreditException");
     }
 
     @And("no order should be created")
@@ -286,8 +285,7 @@ public class OrderPlacementStepDefs {
     @Then("the system should display an error about existing active order")
     public void the_system_should_display_an_error_about_existing_active_order() {
         assertNotNull(lastException, "An exception should have been thrown");
-        assertTrue(lastException instanceof ValidationException,
-            "Exception should be ValidationException");
+        assertInstanceOf(ValidationException.class, lastException, "Exception should be ValidationException");
         assertTrue(lastException.getMessage().contains("commande en cours"),
             "Error message should mention existing order");
     }

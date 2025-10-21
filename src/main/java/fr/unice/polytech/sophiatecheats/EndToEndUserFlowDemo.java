@@ -33,37 +33,37 @@ import java.util.UUID;
 public class EndToEndUserFlowDemo {
 
     public static void main(String[] args) {
-        System.out.println("=== DÉMONSTRATION FLUX UTILISATEUR COMPLET - SophiaTechEats ===\n");
+        System.out.println("=== DEMONSTRATION FLUX UTILISATEUR COMPLET - SophiaTechEats ===\n");
 
         // Configuration de l'application
         ApplicationConfig config = new ApplicationConfig();
 
         // === ÉTAPE 0: PRÉPARATION DES DONNÉES ===
-        System.out.println("🔧 PRÉPARATION: Configuration des données de test...");
+        System.out.println("PREPARATION: Configuration des donnees de test...");
         setupTestData(config);
 
         // === ÉTAPE 1: PARCOURIR LES RESTAURANTS ===
-        System.out.println("\n📋 ÉTAPE 1: L'utilisateur parcourt les restaurants disponibles");
+        System.out.println("\nETAPE 1: L'utilisateur parcourt les restaurants disponibles");
         browseRestaurants(config);
 
         // === ÉTAPE 2: AJOUTER DES PLATS AU PANIER ===
-        System.out.println("\n🛒 ÉTAPE 2: L'utilisateur ajoute des plats à son panier");
+        System.out.println("\nETAPE 2: L'utilisateur ajoute des plats a son panier");
         addDishesToCart(config);
 
         // === ÉTAPE 3: CONSULTER LE PANIER ===
-        System.out.println("\n👀 ÉTAPE 3: L'utilisateur consulte son panier");
+        System.out.println("\nETAPE 3: L'utilisateur consulte son panier");
         viewCart(config);
 
         // === ÉTAPE 4: PASSER COMMANDE AVEC PAIEMENT PAR CRÉDIT ÉTUDIANT ===
-        System.out.println("\n💳 ÉTAPE 4: L'utilisateur passe commande et paie avec son crédit étudiant");
+        System.out.println("\nETAPE 4: L'utilisateur passe commande et paie avec son credit etudiant");
         String orderId = placeOrderWithStudentCredit(config);
 
         // === ÉTAPE 5: CONFIRMER LA COMMANDE ===
-        System.out.println("\n✅ ÉTAPE 5: La commande est confirmée (simulation restaurant)");
+        System.out.println("\nETAPE 5: La commande est confirmee (simulation restaurant)");
         confirmOrder(config, orderId);
 
-        System.out.println("\n🎉 === FLUX COMPLET TERMINÉ AVEC SUCCÈS ===");
-        System.out.println("L'utilisateur a pu réaliser un parcours complet de A à Z !");
+        System.out.println("\n=== FLUX COMPLET TERMINE AVEC SUCCES ===");
+        System.out.println("L'utilisateur a pu realiser un parcours complet de A a Z !");
     }
 
     private static void setupTestData(ApplicationConfig config) {
@@ -106,8 +106,8 @@ public class EndToEndUserFlowDemo {
         pizzeria.addDish(tiramisu);
         restaurantRepo.save(pizzeria);
 
-        System.out.println("✓ Utilisateur créé: " + student.getName() + " (Crédit: " + student.getStudentCredit() + "€)");
-        System.out.println("✓ Restaurant créé: " + pizzeria.getName() + " avec " + pizzeria.getMenu().size() + " plats");
+        System.out.println("✓ Utilisateur cree: " + student.getName() + " (Credit: " + student.getStudentCredit() + "€)");
+        System.out.println("✓ Restaurant cree: " + pizzeria.getName() + " avec " + pizzeria.getMenu().size() + " plats");
     }
 
     private static void browseRestaurants(ApplicationConfig config) {
@@ -123,10 +123,10 @@ public class EndToEndUserFlowDemo {
         );
         BrowseRestaurantsResponse response = browseUseCase.execute(request);
 
-        System.out.println("📍 Restaurants disponibles: " + response.restaurants().size());
+        System.out.println("Restaurants disponibles: " + response.restaurants().size());
         response.restaurants().forEach(restaurant -> {
             System.out.println("  • " + restaurant.name() + " - " + restaurant.address());
-            System.out.println("    💰 Plats disponibles: " + restaurant.dishes().size());
+            System.out.println("    Plats disponibles: " + restaurant.dishes().size());
             restaurant.dishes().forEach(dish -> {
                 System.out.println("      - " + dish.name() + " (" + dish.price() + "€) - " + dish.description());
             });
@@ -149,8 +149,8 @@ public class EndToEndUserFlowDemo {
         AddDishToCartRequest pizzaRequest = new AddDishToCartRequest(user.getId(), pizza.getId(), 1);
         AddDishToCartResponse pizzaResponse = addToCartUseCase.execute(pizzaRequest);
 
-        System.out.println("🍕 Ajouté au panier: " + pizza.getName() + " x1");
-        System.out.println("   💰 Sous-total: " + pizzaResponse.totalAmount() + "€");
+        System.out.println("Ajoute au panier: " + pizza.getName() + " x1");
+        System.out.println("   Sous-total: " + pizzaResponse.totalAmount() + "€");
 
         // Ajouter salade au panier
         Dish salade = restaurant.getMenu().stream()
@@ -160,8 +160,8 @@ public class EndToEndUserFlowDemo {
         AddDishToCartRequest saladeRequest = new AddDishToCartRequest(user.getId(), salade.getId(), 1);
         AddDishToCartResponse saladeResponse = addToCartUseCase.execute(saladeRequest);
 
-        System.out.println("🥗 Ajouté au panier: " + salade.getName() + " x1");
-        System.out.println("   💰 Sous-total: " + saladeResponse.totalAmount() + "€");
+        System.out.println("Ajoute au panier: " + salade.getName() + " x1");
+        System.out.println("   Sous-total: " + saladeResponse.totalAmount() + "€");
     }
 
     private static void viewCart(ApplicationConfig config) {
@@ -172,16 +172,16 @@ public class EndToEndUserFlowDemo {
 
         try {
             var cartResponse = getCartUseCase.execute(user.getId());
-            System.out.println("🛒 Contenu du panier:");
-            System.out.println("   📦 Articles: " + cartResponse.totalItems());
-            System.out.println("   💰 Total: " + cartResponse.totalAmount() + "€");
+            System.out.println("Contenu du panier:");
+            System.out.println("   Articles: " + cartResponse.totalItems());
+            System.out.println("   Total: " + cartResponse.totalAmount() + "€");
 
             cartResponse.items().forEach(item -> {
                 System.out.println("     • " + item.dishName() + " x" + item.quantity() +
                                  " = " + item.subtotal() + "€");
             });
         } catch (Exception e) {
-            System.out.println("❗ Impossible de récupérer le panier: " + e.getMessage());
+            System.out.println("Impossible de recuperer le panier: " + e.getMessage());
         }
     }
 
@@ -193,7 +193,7 @@ public class EndToEndUserFlowDemo {
         User user = userRepo.findAll().get(0);
         Restaurant restaurant = restaurantRepo.findAll().get(0);
 
-        System.out.println("💳 Crédit disponible avant commande: " + user.getStudentCredit() + "€");
+        System.out.println("Credit disponible avant commande: " + user.getStudentCredit() + "€");
 
         PlaceOrderRequest orderRequest = new PlaceOrderRequest(
             user.getId(),
@@ -203,18 +203,18 @@ public class EndToEndUserFlowDemo {
 
         PlaceOrderResponse orderResponse = placeOrderUseCase.execute(orderRequest);
 
-        System.out.println("🎯 Commande créée avec succès!");
-        System.out.println("   📋 ID commande: " + orderResponse.orderId());
-        System.out.println("   👤 Client: " + orderResponse.customerName());
-        System.out.println("   🏪 Restaurant: " + orderResponse.restaurantName());
-        System.out.println("   💰 Montant: " + orderResponse.totalAmount() + "€");
-        System.out.println("   💳 Paiement: " + orderResponse.paymentMethod());
-        System.out.println("   📊 Statut: " + orderResponse.status());
-        System.out.println("   🕐 Commandé le: " + orderResponse.orderDateTime());
+        System.out.println("Commande creee avec succes!");
+        System.out.println("   ID commande: " + orderResponse.orderId());
+        System.out.println("   Client: " + orderResponse.customerName());
+        System.out.println("   Restaurant: " + orderResponse.restaurantName());
+        System.out.println("   Montant: " + orderResponse.totalAmount() + "€");
+        System.out.println("   Paiement: " + orderResponse.paymentMethod());
+        System.out.println("   Statut: " + orderResponse.status());
+        System.out.println("   Commande le: " + orderResponse.orderDateTime());
 
         // Vérifier le crédit restant
         User updatedUser = userRepo.findById(user.getId()).orElseThrow();
-        System.out.println("💳 Crédit restant: " + updatedUser.getStudentCredit() + "€");
+        System.out.println("Credit restant: " + updatedUser.getStudentCredit() + "€");
 
         return orderResponse.orderId();
     }
@@ -225,15 +225,15 @@ public class EndToEndUserFlowDemo {
         ConfirmOrderRequest confirmRequest = new ConfirmOrderRequest(orderId);
         ConfirmOrderResponse confirmResponse = confirmUseCase.execute(confirmRequest);
 
-        System.out.println("✅ Commande confirmée!");
-        System.out.println("   📋 ID commande: " + confirmResponse.orderId());
-        System.out.println("   👤 Client: " + confirmResponse.customerName());
-        System.out.println("   🏪 Restaurant: " + confirmResponse.restaurantName());
-        System.out.println("   💰 Montant total: " + confirmResponse.totalAmount() + "€");
-        System.out.println("   📊 Statut: " + confirmResponse.status());
-        System.out.println("   ✅ Confirmée le: " + confirmResponse.confirmedAt());
-        System.out.println("   🚚 Livraison estimée: " + confirmResponse.estimatedDeliveryTime());
+        System.out.println("Commande confirmee!");
+        System.out.println("   ID commande: " + confirmResponse.orderId());
+        System.out.println("   Client: " + confirmResponse.customerName());
+        System.out.println("   Restaurant: " + confirmResponse.restaurantName());
+        System.out.println("   Montant total: " + confirmResponse.totalAmount() + "€");
+        System.out.println("   Statut: " + confirmResponse.status());
+        System.out.println("   Confirmee le: " + confirmResponse.confirmedAt());
+        System.out.println("   Livraison estimee: " + confirmResponse.deliveryTime());
 
-        System.out.println("\n🍕 Votre commande sera livrée dans environ 30 minutes!");
+        System.out.println("\nVotre commande sera livree dans environ 30 minutes!");
     }
 }

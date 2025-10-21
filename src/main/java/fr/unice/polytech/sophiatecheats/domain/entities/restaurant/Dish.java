@@ -5,6 +5,7 @@ import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
 import fr.unice.polytech.sophiatecheats.domain.enums.DietType;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.DishValidationException;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -21,10 +22,13 @@ public class Dish implements Entity<UUID>{
     private final UUID id;
     private final String name;
     private final String description;
+    @Setter
     private BigDecimal price;
     private final DishCategory category;
     private boolean available;
     private final Set<DietType> dietTypes;
+    // Identifiant du restaurant propriétaire du plat (peut être null si non initialisé)
+    private UUID restaurantId;
 
 
 
@@ -37,6 +41,7 @@ public class Dish implements Entity<UUID>{
         this.category = builder.category;
         this.available = builder.available;
         this.dietTypes = new HashSet<>(builder.dietTypes);
+        this.restaurantId = builder.restaurantId;
         validate();
     }
 
@@ -52,6 +57,7 @@ public class Dish implements Entity<UUID>{
         private DishCategory category = DishCategory.MAIN_COURSE;
         private boolean available = true;
         private Set<DietType> dietTypes = new HashSet<>();
+        private UUID restaurantId;
 
         public Builder id(UUID id) {
             this.id = id;
@@ -85,6 +91,11 @@ public class Dish implements Entity<UUID>{
 
         public Builder dietTypes(Set<DietType> dietTypes) {
             this.dietTypes = new HashSet<>(dietTypes);
+            return this;
+        }
+
+        public Builder restaurantId(UUID restaurantId) {
+            this.restaurantId = restaurantId;
             return this;
         }
 
@@ -130,6 +141,18 @@ public class Dish implements Entity<UUID>{
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    /**
+     * Permet d'initialiser ou mettre à jour l'UUID du restaurant propriétaire du plat.
+     * Utilisé par `Restaurant.addDish` afin que le plat connaisse son restaurant.
+     */
+    public void setRestaurantId(UUID restaurantId) {
+        this.restaurantId = restaurantId;
+    }
+
+    public UUID getRestaurantId() {
+        return restaurantId;
     }
 
     @Override

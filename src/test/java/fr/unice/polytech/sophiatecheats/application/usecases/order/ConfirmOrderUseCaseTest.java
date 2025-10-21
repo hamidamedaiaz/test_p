@@ -78,7 +78,7 @@ class ConfirmOrderUseCaseTest {
         assertEquals(testRestaurant.getName(), response.restaurantName());
         assertEquals(testOrder.getTotalAmount(), response.totalAmount());
         assertEquals(OrderStatus.CONFIRMED, response.status());
-        assertNotNull(response.estimatedDeliveryTime());
+        assertNotNull(response.deliveryTime());
 
         verify(orderRepository).findById(testOrder.getOrderId());
         verify(orderRepository).save(testOrder);

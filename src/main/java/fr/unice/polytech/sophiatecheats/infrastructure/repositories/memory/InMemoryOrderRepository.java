@@ -4,7 +4,9 @@ import fr.unice.polytech.sophiatecheats.domain.entities.order.Order;
 import fr.unice.polytech.sophiatecheats.domain.enums.OrderStatus;
 import fr.unice.polytech.sophiatecheats.domain.repositories.OrderRepository;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * In-memory implementation of OrderRepository for MVP.
@@ -25,5 +27,12 @@ public class InMemoryOrderRepository extends InMemoryRepository<Order, String> i
             }
         }
         return false;
+    }
+
+    @Override
+    public List<Order> findAllByStatus(OrderStatus status) {
+        return storage.values().stream()
+                .filter(order -> order.getStatus() == status)
+                .collect(Collectors.toList());
     }
 }

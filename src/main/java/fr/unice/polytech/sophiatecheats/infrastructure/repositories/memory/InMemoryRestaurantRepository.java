@@ -15,7 +15,7 @@ import java.util.*;
  * Contains sample data for testing and development.
  */
 public class InMemoryRestaurantRepository extends InMemoryRepository<Restaurant, UUID> implements RestaurantRepository {
-    private Map<UUID, Restaurant> restaurants = new HashMap<>();
+    private final Map<UUID, Restaurant> restaurants = new HashMap<>();
 
     public InMemoryRestaurantRepository() {
         this(true);

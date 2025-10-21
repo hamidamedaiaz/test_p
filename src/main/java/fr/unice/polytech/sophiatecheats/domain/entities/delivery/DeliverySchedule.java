@@ -3,6 +3,7 @@ package fr.unice.polytech.sophiatecheats.domain.entities.delivery;
 import fr.unice.polytech.sophiatecheats.domain.entities.restaurant.TimeSlot;
 import fr.unice.polytech.sophiatecheats.domain.entities.restaurant.Schedule;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.SlotNotFoundException;
+import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.util.*;
  * Gère la génération, la recherche et la réservation des créneaux.
  */
 public class DeliverySchedule {
+    @Getter
     private final UUID restaurantId;
     private final Map<LocalDate, List<TimeSlot>> slotsByDate = new HashMap<>();
 
@@ -33,8 +35,8 @@ public class DeliverySchedule {
         }
 
         List<TimeSlot> slots = new ArrayList<>();
-        LocalTime openingTime = restaurantSchedule.getOpeningTime();
-        LocalTime closingTime = restaurantSchedule.getClosingTime();
+        LocalTime openingTime = restaurantSchedule.openingTime();
+        LocalTime closingTime = restaurantSchedule.closingTime();
 
         // Commence à l'heure d'ouverture, se termine à l'heure de fermeture
         LocalDateTime current = date.atTime(openingTime);
@@ -138,7 +140,4 @@ public class DeliverySchedule {
         );
     }
 
-    public UUID getRestaurantId() {
-        return restaurantId;
-    }
 }

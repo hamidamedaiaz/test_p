@@ -112,11 +112,16 @@ public class ExternalCardStrategy implements PaymentStrategy {
             return false;
         }
 
-        // Pour les paiements par carte bancaire externe, on ne vérifie PAS le crédit étudiant
-        // La validation du paiement se fait côté banque/service de paiement externe
-        // On accepte tous les montants valides (positifs et dans les limites de transaction)
+        // En production, on vérifierait ici :
+        // - La validité de la carte
+        // - La limite de crédit
+        // - Les fraudes potentielles
+        // - etc.
+
+        // Pour la simulation, on accepte tous les paiements dans les limites
         return amount.compareTo(MIN_TRANSACTION_AMOUNT) >= 0
-            && amount.compareTo(MAX_TRANSACTION_AMOUNT) <= 0;
+            && amount.compareTo(MAX_TRANSACTION_AMOUNT) <= 0
+            && serviceAvailable;
     }
 
     @Override
@@ -148,3 +153,4 @@ public class ExternalCardStrategy implements PaymentStrategy {
         }
     }
 }
+

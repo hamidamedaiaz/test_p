@@ -3,8 +3,6 @@ package fr.unice.polytech.sophiatecheats.infrastructure.config;
 import fr.unice.polytech.sophiatecheats.application.usecases.user.order.PlaceOrderUseCase;
 import fr.unice.polytech.sophiatecheats.application.usecases.order.ConfirmOrderUseCase;
 import fr.unice.polytech.sophiatecheats.application.usecases.order.SelectDeliverySlotUseCase;
-import fr.unice.polytech.sophiatecheats.application.usecases.order.ProcessPaymentUseCase;
-import fr.unice.polytech.sophiatecheats.application.usecases.order.CompleteOrderFlowUseCase;
 import fr.unice.polytech.sophiatecheats.application.usecases.user.BrowseRestaurantsUseCase;
 import fr.unice.polytech.sophiatecheats.application.usecases.restaurant.AddDishToRestaurantUseCase;
 import fr.unice.polytech.sophiatecheats.application.usecases.restaurant.UpdateDishUseCase;
@@ -14,7 +12,6 @@ import fr.unice.polytech.sophiatecheats.domain.repositories.OrderRepository;
 import fr.unice.polytech.sophiatecheats.domain.repositories.UserRepository;
 import fr.unice.polytech.sophiatecheats.domain.repositories.RestaurantRepository;
 import fr.unice.polytech.sophiatecheats.domain.repositories.CartRepository;
-import fr.unice.polytech.sophiatecheats.domain.services.PaymentService;
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryOrderRepository;
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryRestaurantRepository;
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryUserRepository;
@@ -63,7 +60,6 @@ public class ApplicationConfig {
     container.addComponent(CartRepository.class, InMemoryCartRepository.class);
 
     // Services
-    container.addComponent(PaymentService.class);
 
     // Use Cases
     container.addComponent(BrowseRestaurantsUseCase.class);
@@ -71,9 +67,8 @@ public class ApplicationConfig {
 
     // Order Flow Use Cases - Complete order→slot→payment sequence
     container.addComponent(SelectDeliverySlotUseCase.class);
-    container.addComponent(ProcessPaymentUseCase.class);
     container.addComponent(ConfirmOrderUseCase.class);
-    container.addComponent(CompleteOrderFlowUseCase.class);
+    
 
     // Cart Use Cases - Now using the corrected AddDishToCartUseCase
     container.addComponent(AddDishToCartUseCase.class);

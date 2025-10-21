@@ -1,17 +1,11 @@
 package fr.unice.polytech.sophiatecheats.domain.entities.restaurant;
 
 import fr.unice.polytech.sophiatecheats.domain.exceptions.RestaurantValidationException;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Objects;
 
-@Getter
-public class Schedule {
-
-    private final LocalTime openingTime;
-    private final LocalTime closingTime;
+public record Schedule(LocalTime openingTime, LocalTime closingTime) {
 
     public Schedule(LocalTime openingTime, LocalTime closingTime) {
         this.openingTime = openingTime;
@@ -41,20 +35,6 @@ public class Schedule {
             return false;
         }
         return isOpenAt(dateTime.toLocalTime());
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Schedule schedule = (Schedule) obj;
-        return Objects.equals(openingTime, schedule.openingTime) &&
-               Objects.equals(closingTime, schedule.closingTime);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(openingTime, closingTime);
     }
 
     @Override

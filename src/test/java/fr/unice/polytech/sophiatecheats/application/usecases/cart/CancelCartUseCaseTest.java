@@ -56,9 +56,9 @@ class CancelCartUseCaseTest {
 
         // Then: Le panier est supprimé
         assertNotNull(response, "La réponse ne devrait pas être nulle");
-        assertTrue(response.isSuccess(), "L'opération devrait réussir");
-        assertEquals(cartId, response.getCancelledCartId(), "L'ID du panier supprimé devrait correspondre");
-        assertEquals("Panier annulé et supprimé avec succès", response.getMessage(),
+        assertTrue(response.success(), "L'opération devrait réussir");
+        assertEquals(cartId, response.cancelledCartId(), "L'ID du panier supprimé devrait correspondre");
+        assertEquals("Panier annulé et supprimé avec succès", response.message(),
             "Le message de succès devrait être correct");
 
         // Vérifier que le repository a bien été appelé
@@ -77,7 +77,7 @@ class CancelCartUseCaseTest {
         CancelCartResponse response = useCase.execute(userId);
 
         // Then
-        assertEquals(cartId, response.getCancelledCartId(),
+        assertEquals(cartId, response.cancelledCartId(),
             "L'ID retourné doit correspondre à l'ID du panier supprimé");
     }
 
@@ -93,11 +93,11 @@ class CancelCartUseCaseTest {
 
         // Then: Une erreur est retournée
         assertNotNull(response, "La réponse ne devrait pas être nulle");
-        assertFalse(response.isSuccess(), "L'opération devrait échouer");
-        assertNull(response.getCancelledCartId(), "L'ID du panier devrait être null en cas d'erreur");
-        assertTrue(response.getMessage().contains("Panier introuvable"),
+        assertFalse(response.success(), "L'opération devrait échouer");
+        assertNull(response.cancelledCartId(), "L'ID du panier devrait être null en cas d'erreur");
+        assertTrue(response.message().contains("Panier introuvable"),
             "Le message devrait indiquer que le panier est introuvable");
-        assertTrue(response.getMessage().contains(userId.toString()),
+        assertTrue(response.message().contains(userId.toString()),
             "Le message devrait contenir l'ID de l'utilisateur");
 
         // Vérifier qu'on n'a pas essayé de supprimer
@@ -117,7 +117,7 @@ class CancelCartUseCaseTest {
 
         // Then
         String expectedMessage = "Aucun panier actif trouvé pour l'utilisateur: " + userId;
-        assertTrue(response.getMessage().contains(expectedMessage),
+        assertTrue(response.message().contains(expectedMessage),
             "Le message d'erreur devrait contenir l'ID de l'utilisateur");
     }
 
@@ -136,11 +136,11 @@ class CancelCartUseCaseTest {
 
         // Then: L'erreur est capturée et retournée proprement
         assertNotNull(response, "La réponse ne devrait pas être nulle");
-        assertFalse(response.isSuccess(), "L'opération devrait échouer");
-        assertNull(response.getCancelledCartId(), "L'ID devrait être null en cas d'erreur");
-        assertTrue(response.getMessage().contains("Erreur lors de la suppression"),
+        assertFalse(response.success(), "L'opération devrait échouer");
+        assertNull(response.cancelledCartId(), "L'ID devrait être null en cas d'erreur");
+        assertTrue(response.message().contains("Erreur lors de la suppression"),
             "Le message devrait indiquer une erreur de suppression");
-        assertTrue(response.getMessage().contains("Erreur base de données"),
+        assertTrue(response.message().contains("Erreur base de données"),
             "Le message devrait contenir les détails de l'exception");
 
         // Vérifier les appels
@@ -161,8 +161,8 @@ class CancelCartUseCaseTest {
         CancelCartResponse response = useCase.execute(userId);
 
         // Then
-        assertFalse(response.isSuccess());
-        assertTrue(response.getMessage().contains("Erreur lors de la suppression"));
+        assertFalse(response.success());
+        assertTrue(response.message().contains("Erreur lors de la suppression"));
     }
 
 
@@ -225,8 +225,8 @@ class CancelCartUseCaseTest {
         CancelCartResponse response = useCase.execute(anotherUserId);
 
         // Then
-        assertTrue(response.isSuccess());
-        assertEquals(anotherCartId, response.getCancelledCartId());
+        assertTrue(response.success());
+        assertEquals(anotherCartId, response.cancelledCartId());
     }
 
     @Test
@@ -240,7 +240,7 @@ class CancelCartUseCaseTest {
         CancelCartResponse response = useCase.execute(userId);
 
         // Then
-        assertTrue(response.isSuccess());
+        assertTrue(response.success());
 
         // Given: Cas d'échec
         when(cartRepository.findActiveCartByUserId(userId))
@@ -250,7 +250,7 @@ class CancelCartUseCaseTest {
         CancelCartResponse errorResponse = useCase.execute(userId);
 
         // Then
-        assertFalse(errorResponse.isSuccess());
+        assertFalse(errorResponse.success());
     }
 
 
@@ -266,14 +266,14 @@ class CancelCartUseCaseTest {
         CancelCartResponse firstResponse = useCase.execute(userId);
 
         // Then
-        assertTrue(firstResponse.isSuccess());
+        assertTrue(firstResponse.success());
 
         // When: Deuxième appel (panier déjà supprimé)
         CancelCartResponse secondResponse = useCase.execute(userId);
 
         // Then: Retourne une erreur propre (pas de crash)
-        assertFalse(secondResponse.isSuccess());
-        assertTrue(secondResponse.getMessage().contains("introuvable"));
+        assertFalse(secondResponse.success());
+        assertTrue(secondResponse.message().contains("introuvable"));
     }
 
     @Test
@@ -287,7 +287,7 @@ class CancelCartUseCaseTest {
         CancelCartResponse response = useCase.execute(userId);
 
         // Then: Vérifier le message exact
-        assertEquals("Panier annulé et supprimé avec succès", response.getMessage(),
+        assertEquals("Panier annulé et supprimé avec succès", response.message(),
             "Le message de succès doit être exactement celui attendu");
     }
 }

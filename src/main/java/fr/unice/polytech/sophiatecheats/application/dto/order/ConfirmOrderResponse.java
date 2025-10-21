@@ -15,5 +15,5 @@ public record ConfirmOrderResponse(
     BigDecimal totalAmount,
     OrderStatus status,
     LocalDateTime confirmedAt,
-    LocalDateTime estimatedDeliveryTime
+    LocalDateTime deliveryTime
 ) {}

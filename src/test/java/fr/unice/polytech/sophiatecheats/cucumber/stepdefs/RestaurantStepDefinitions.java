@@ -234,7 +234,7 @@ public class RestaurantStepDefinitions {
         // In that case, we should consider it as an empty result
         if (response == null) {
             // This is acceptable for error scenarios where an exception was thrown
-            assertTrue(lastException != null, "Expected either a response or an exception");
+            assertNotNull(lastException, "Expected either a response or an exception");
         } else {
             assertTrue(response.restaurants().isEmpty());
         }
@@ -274,8 +274,7 @@ public class RestaurantStepDefinitions {
     @Then("I should receive an error about invalid cuisine type")
     public void iShouldReceiveAnErrorAboutInvalidCuisineType() {
         assertNotNull(lastException, "Expected an exception to be thrown");
-        assertTrue(lastException instanceof InvalidCuisineException,
-            "Expected InvalidCuisineException but got " + lastException.getClass().getSimpleName());
+        assertInstanceOf(InvalidCuisineException.class, lastException, "Expected InvalidCuisineException but got " + lastException.getClass().getSimpleName());
     }
 
     @Then("the response should indicate no open restaurants are available")
@@ -287,8 +286,7 @@ public class RestaurantStepDefinitions {
     @Then("I should receive an error about system unavailability")
     public void iShouldReceiveAnErrorAboutSystemUnavailability() {
         assertNotNull(lastException, "Expected a system unavailable exception");
-        assertTrue(lastException instanceof RuntimeException,
-            "Expected RuntimeException but got " + lastException.getClass().getSimpleName());
+        assertInstanceOf(RuntimeException.class, lastException, "Expected RuntimeException but got " + lastException.getClass().getSimpleName());
         assertTrue(lastException.getMessage().contains("System is temporarily unavailable"),
             "Exception message should indicate system unavailability");
     }

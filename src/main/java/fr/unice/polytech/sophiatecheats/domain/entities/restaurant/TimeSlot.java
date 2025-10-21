@@ -311,8 +311,11 @@ public class TimeSlot implements Entity<UUID> {
      * @throws ValidationException si la réservation est impossible
      */
     public void reserveOrThrow() {
+        if (reservedCount >= maxCapacity) {
+            throw new ValidationException("Impossible de réserver le créneau : capacité maximale atteinte (" + maxCapacity + ")");
+        }
         if (!isAvailable()) {
-            throw new ValidationException("Impossible de réserver le créneau: capacité atteinte ou créneau expiré");
+            throw new ValidationException("Impossible de réserver le créneau : créneau expiré, désactivé ou complet");
         }
         reservedCount++;
     }

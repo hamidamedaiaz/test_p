@@ -85,6 +85,11 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
             throw new ValidationException("Le panier est vide. Impossible de créer une commande.");
         }
 
+        // Vérifier le délai d'expiration du panier (5 minutes)
+        if (cart.getCreatedAt() != null && java.time.Duration.between(cart.getCreatedAt(), java.time.LocalDateTime.now()).toMinutes() > 5) {
+            throw new ValidationException("Le délai pour valider votre panier est dépassé. Veuillez recommencer votre commande.");
+        }
+
         // Récupérer le restaurant
         Restaurant restaurant = restaurantRepository.findById(request.restaurantId())
             .orElseThrow(() -> new EntityNotFoundException("Restaurant not found: " + request.restaurantId()));
@@ -123,16 +128,17 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
         }
 
         // Traiter le paiement via la stratégie
-        // ⚠️ IMPORTANT: La stratégie gère elle-même la déduction du crédit si nécessaire
         PaymentResult paymentResult = paymentContext.executePayment(totalAmount, user);
 
         // Vérifier le résultat du paiement
         if (!paymentResult.success()) {
             throw new ValidationException("Échec du paiement: " + paymentResult.message());
         }
+        
+        
 
         // Sauvegarder l'utilisateur UNIQUEMENT si le crédit étudiant a été modifié
-        // La stratégie StudentCreditStrategy a déjà déduit le crédit dans executePayment()
+        // (pas nécessaire pour les paiements externes)
         if (request.paymentMethod() == PaymentMethod.STUDENT_CREDIT) {
             userRepository.save(user);
         }
@@ -145,7 +151,7 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
             request.paymentMethod()
         );
 
-        // Marquer comme payé si paiement par crédit étudiant
+        // Marquer automatiquement comme payé pour le crédit étudiant
         if (request.paymentMethod() == PaymentMethod.STUDENT_CREDIT) {
             order.markAsPaid();
         }
@@ -153,7 +159,7 @@ public class PlaceOrderUseCase implements UseCase<PlaceOrderRequest, PlaceOrderR
         // Sauvegarder la commande
         Order savedOrder = orderRepository.save(order);
 
-        // Vider le panier après transformation en commande
+        // Vider le panier apres transformation en commande
         cartRepository.delete(cart);
 
         return new PlaceOrderResponse(

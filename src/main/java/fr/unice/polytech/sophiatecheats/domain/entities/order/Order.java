@@ -23,7 +23,9 @@ public class Order {
     private LocalDateTime orderDateTime;
     private LocalDateTime deliveryTime;
     private PaymentMethod paymentMethod;
-    private UUID deliverySlotId; // Link to the reserved delivery slot
+    private UUID deliverySlotId;
+    /** Date/heure de réservation du créneau de livraison */
+    private LocalDateTime deliverySlotReservedAt;
 
     public Order(User user, Restaurant restaurant, List<OrderItem> orderItems,
                     PaymentMethod paymentMethod) {
@@ -35,7 +37,7 @@ public class Order {
         this.totalAmount= calculateTotalAmount();
         this.orderDateTime=LocalDateTime.now();
         this.paymentMethod=paymentMethod;
-        this.deliverySlotId = null; // Will be set when slot is selected
+        this.deliverySlotId = null;
     }
 
 
@@ -93,14 +95,14 @@ public class Order {
         }
         this.deliverySlotId = slotId;
         this.deliveryTime = slotStartTime;
+        // NE PAS démarrer le chrono ici !
     }
 
     /**
-     * Releases the delivery slot (e.g., on payment timeout or cancellation).
+     * Démarre le timeout de paiement (à appeler quand l'utilisateur passe à l'étape de paiement).
      */
-    public void releaseDeliverySlot() {
-        this.deliverySlotId = null;
-        this.deliveryTime = null;
+    public void startPaymentTimeout() {
+        this.deliverySlotReservedAt = LocalDateTime.now();
     }
 
     /**
@@ -108,6 +110,24 @@ public class Order {
      */
     public boolean hasDeliverySlot() {
         return deliverySlotId != null;
+    }
+
+    /**
+     * Libère le créneau de livraison associé à la commande.
+     */
+    public void releaseDeliverySlot() {
+        this.deliverySlotId = null;
+    }
+
+    /**
+     * Expire la commande et libère le créneau de livraison si besoin.
+     */
+    public void expire() {
+        if (status == OrderStatus.EXPIRED) {
+            throw new IllegalStateException("La commande est déjà expirée");
+        }
+        this.status = OrderStatus.EXPIRED;
+        releaseDeliverySlot();
     }
 
 }

@@ -67,11 +67,11 @@ class ClearCartUseCaseTest {
 
         // Then - Le panier est vidé
         assertNotNull(response, "La réponse ne devrait pas être nulle");
-        assertTrue(response.isSuccess(), "L'opération devrait réussir");
-        assertEquals(cartId, response.getCartId(), "L'ID du panier devrait correspondre");
-        assertEquals(0, response.getItemCount(), "Le panier devrait contenir 0 items");
-        assertEquals(BigDecimal.ZERO, response.getTotalAmount(), "Le montant total devrait être 0");
-        assertEquals("Panier vidé avec succès", response.getMessage(),
+        assertTrue(response.success(), "L'opération devrait réussir");
+        assertEquals(cartId, response.cartId(), "L'ID du panier devrait correspondre");
+        assertEquals(0, response.itemCount(), "Le panier devrait contenir 0 items");
+        assertEquals(BigDecimal.ZERO, response.totalAmount(), "Le montant total devrait être 0");
+        assertEquals("Panier vidé avec succès", response.message(),
             "Le message de succès devrait être correct");
 
         // Vérifier que les méthodes du repository ont été appelées
@@ -92,7 +92,7 @@ class ClearCartUseCaseTest {
         ClearCartResponse response = useCase.execute(userId);
 
         // Then
-        assertEquals(0, response.getItemCount(),
+        assertEquals(0, response.itemCount(),
             "Le nombre d'items devrait être 0 après vidage");
     }
 
@@ -108,7 +108,7 @@ class ClearCartUseCaseTest {
         ClearCartResponse response = useCase.execute(userId);
 
         // Then
-        assertEquals(BigDecimal.ZERO, response.getTotalAmount(),
+        assertEquals(BigDecimal.ZERO, response.totalAmount(),
             "Le montant total devrait être 0 après vidage");
     }
 
@@ -139,13 +139,13 @@ class ClearCartUseCaseTest {
 
         // Then - Une erreur est retournée
         assertNotNull(response, "La réponse ne devrait pas être nulle");
-        assertFalse(response.isSuccess(), "L'opération devrait échouer");
-        assertNull(response.getCartId(), "L'ID du panier devrait être null en cas d'erreur");
-        assertEquals(0, response.getItemCount(), "itemCount devrait être 0 en cas d'erreur");
-        assertEquals(BigDecimal.ZERO, response.getTotalAmount(), "totalAmount devrait être 0 en cas d'erreur");
-        assertTrue(response.getMessage().contains("Panier introuvable"),
+        assertFalse(response.success(), "L'opération devrait échouer");
+        assertNull(response.cartId(), "L'ID du panier devrait être null en cas d'erreur");
+        assertEquals(0, response.itemCount(), "itemCount devrait être 0 en cas d'erreur");
+        assertEquals(BigDecimal.ZERO, response.totalAmount(), "totalAmount devrait être 0 en cas d'erreur");
+        assertTrue(response.message().contains("Panier introuvable"),
             "Le message devrait indiquer que le panier est introuvable");
-        assertTrue(response.getMessage().contains(userId.toString()),
+        assertTrue(response.message().contains(userId.toString()),
             "Le message devrait contenir l'ID de l'utilisateur");
 
         // Vérifier qu'on n'a pas essayé de vider ou sauvegarder
@@ -166,7 +166,7 @@ class ClearCartUseCaseTest {
 
         // Then
         String expectedMessage = "Aucun panier actif trouvé pour l'utilisateur: " + userId;
-        assertTrue(response.getMessage().contains(expectedMessage),
+        assertTrue(response.message().contains(expectedMessage),
             "Le message d'erreur devrait contenir l'ID de l'utilisateur");
     }
 
@@ -185,11 +185,11 @@ class ClearCartUseCaseTest {
 
         // Then - L'erreur est capturée et retournée proprement
         assertNotNull(response, "La réponse ne devrait pas être nulle");
-        assertFalse(response.isSuccess(), "L'opération devrait échouer");
-        assertNull(response.getCartId(), "L'ID devrait être null en cas d'erreur");
-        assertTrue(response.getMessage().contains("Erreur de validation"),
+        assertFalse(response.success(), "L'opération devrait échouer");
+        assertNull(response.cartId(), "L'ID devrait être null en cas d'erreur");
+        assertTrue(response.message().contains("Erreur de validation"),
             "Le message devrait indiquer une erreur de validation");
-        assertTrue(response.getMessage().contains("items non valides"),
+        assertTrue(response.message().contains("items non valides"),
             "Le message devrait contenir les détails de l'exception");
 
         // Vérifier les appels
@@ -212,9 +212,9 @@ class ClearCartUseCaseTest {
         ClearCartResponse response = useCase.execute(userId);
 
         // Then
-        assertFalse(response.isSuccess());
-        assertTrue(response.getMessage().contains("Erreur inattendue"));
-        assertTrue(response.getMessage().contains("Erreur base de données"));
+        assertFalse(response.success());
+        assertTrue(response.message().contains("Erreur inattendue"));
+        assertTrue(response.message().contains("Erreur base de données"));
     }
 
     @Test
@@ -230,8 +230,8 @@ class ClearCartUseCaseTest {
         ClearCartResponse response = useCase.execute(userId);
 
         // Then
-        assertFalse(response.isSuccess());
-        assertTrue(response.getMessage().contains("Erreur inattendue"));
+        assertFalse(response.success());
+        assertTrue(response.message().contains("Erreur inattendue"));
     }
 
 
@@ -321,8 +321,8 @@ class ClearCartUseCaseTest {
         ClearCartResponse response = useCase.execute(anotherUserId);
 
         // Then
-        assertTrue(response.isSuccess());
-        assertEquals(anotherCartId, response.getCartId());
+        assertTrue(response.success());
+        assertEquals(anotherCartId, response.cartId());
     }
 
     @Test
@@ -336,7 +336,7 @@ class ClearCartUseCaseTest {
         ClearCartResponse successResponse = useCase.execute(userId);
 
         // Then
-        assertTrue(successResponse.isSuccess());
+        assertTrue(successResponse.success());
 
         // Given - Cas d'échec
         when(cartRepository.findActiveCartByUserId(userId))
@@ -346,7 +346,7 @@ class ClearCartUseCaseTest {
         ClearCartResponse errorResponse = useCase.execute(userId);
 
         // Then
-        assertFalse(errorResponse.isSuccess());
+        assertFalse(errorResponse.success());
     }
 
 
@@ -362,14 +362,14 @@ class ClearCartUseCaseTest {
         ClearCartResponse firstResponse = useCase.execute(userId);
 
         // Then
-        assertTrue(firstResponse.isSuccess());
+        assertTrue(firstResponse.success());
 
         // When - Deuxième appel (panier déjà vide)
         ClearCartResponse secondResponse = useCase.execute(userId);
 
         // Then - Toujours un succès
-        assertTrue(secondResponse.isSuccess());
-        assertEquals("Panier vidé avec succès", secondResponse.getMessage());
+        assertTrue(secondResponse.success());
+        assertEquals("Panier vidé avec succès", secondResponse.message());
     }
 
     @Test
@@ -383,7 +383,7 @@ class ClearCartUseCaseTest {
         ClearCartResponse response = useCase.execute(userId);
 
         // Then - Vérifier le message exact
-        assertEquals("Panier vidé avec succès", response.getMessage(),
+        assertEquals("Panier vidé avec succès", response.message(),
             "Le message de succès doit être exactement celui attendu");
     }
 
@@ -398,11 +398,11 @@ class ClearCartUseCaseTest {
         ClearCartResponse response = useCase.execute(userId);
 
         // Then - Vérifier toutes les valeurs
-        assertEquals(cartId, response.getCartId(), "cartId devrait correspondre");
-        assertEquals(0, response.getItemCount(), "itemCount devrait être 0");
-        assertEquals(BigDecimal.ZERO, response.getTotalAmount(), "totalAmount devrait être 0");
-        assertTrue(response.isSuccess(), "success devrait être true");
-        assertNotNull(response.getMessage(), "message ne devrait pas être null");
+        assertEquals(cartId, response.cartId(), "cartId devrait correspondre");
+        assertEquals(0, response.itemCount(), "itemCount devrait être 0");
+        assertEquals(BigDecimal.ZERO, response.totalAmount(), "totalAmount devrait être 0");
+        assertTrue(response.success(), "success devrait être true");
+        assertNotNull(response.message(), "message ne devrait pas être null");
     }
 }
 

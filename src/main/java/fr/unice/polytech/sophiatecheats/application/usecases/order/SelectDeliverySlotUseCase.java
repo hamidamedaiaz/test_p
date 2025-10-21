@@ -12,13 +12,11 @@ import fr.unice.polytech.sophiatecheats.domain.repositories.OrderRepository;
 import fr.unice.polytech.sophiatecheats.domain.repositories.RestaurantRepository;
 
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Use case pour sélectionner et réserver un créneau de livraison pour une commande.
- *
+ * <p>
  * Ce use case implémente la deuxième étape du flux: Order → Slot → Payment
- *
  * Flux:
  * 1. Vérifie que la commande existe et n'a pas déjà de créneau
  * 2. Trouve le créneau demandé dans le restaurant
@@ -50,6 +48,15 @@ public class SelectDeliverySlotUseCase implements UseCase<SelectDeliverySlotRequ
         if (order.hasDeliverySlot()) {
             throw new IllegalStateException("Order already has a delivery slot assigned");
         }
+        // 2b. Vérifier que la commande est dans un état permettant la réservation du créneau
+        switch (order.getStatus()) {
+            case PENDING:
+            case PAID:
+                break; // OK
+            default:
+                throw new fr.unice.polytech.sophiatecheats.domain.exceptions.ValidationException(
+                    "Impossible de réserver un créneau pour une commande non validée (statut actuel: " + order.getStatus() + ")");
+        }
 
         // 3. Récupérer le restaurant et son planning de livraison
         Restaurant restaurant = restaurantRepository.findById(order.getRestaurant().getId())
@@ -63,11 +70,7 @@ public class SelectDeliverySlotUseCase implements UseCase<SelectDeliverySlotRequ
 
         TimeSlot slot = slotOpt.get();
 
-        // 5. Vérifier que le créneau est disponible et le réserver
-        if (!slot.isAvailable()) {
-            throw new SlotNotFoundException("Slot " + request.slotId() + " is no longer available");
-        }
-
+        // 5. Réserver le créneau (la méthode gère toute la logique de capacité/disponibilité)
         try {
             slot.reserveOrThrow();
         } catch (Exception e) {

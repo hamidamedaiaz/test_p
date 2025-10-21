@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -88,7 +89,7 @@ class AddDishToCartUseCaseTest {
 
         // Configuration des mocks
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(restaurantRepository.findAll()).thenReturn(Arrays.asList(testRestaurant));
+        when(restaurantRepository.findAll()).thenReturn(Collections.singletonList(testRestaurant));
         when(cartRepository.findActiveCartByUserId(userId)).thenReturn(Optional.empty()); // Pas de panier existant
         when(cartRepository.save(any(Cart.class))).thenReturn(null);
 
@@ -126,7 +127,7 @@ class AddDishToCartUseCaseTest {
         AddDishToCartRequest request = new AddDishToCartRequest(userId, dishId, 2);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(restaurantRepository.findAll()).thenReturn(Arrays.asList(testRestaurant));
+        when(restaurantRepository.findAll()).thenReturn(Collections.singletonList(testRestaurant));
         when(cartRepository.findActiveCartByUserId(userId)).thenReturn(Optional.of(existingCart));
         when(cartRepository.save(any(Cart.class))).thenReturn(null);
 
@@ -175,7 +176,7 @@ class AddDishToCartUseCaseTest {
         AddDishToCartRequest request = new AddDishToCartRequest(userId, unavailableDish.getId(), 1);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(restaurantRepository.findAll()).thenReturn(Arrays.asList(testRestaurant));
+        when(restaurantRepository.findAll()).thenReturn(Collections.singletonList(testRestaurant));
         when(cartRepository.findActiveCartByUserId(userId)).thenReturn(Optional.empty());
 
         // When

@@ -167,7 +167,7 @@ PlaceOrderUseCase placeOrderUseCase = config.getInstance(PlaceOrderUseCase.class
 PlaceOrderResponse order = placeOrderUseCase.execute(new PlaceOrderRequest(
     userId,
     restaurantId,
-    Arrays.asList(new OrderItemRequest(dishId, 2)),
+        List.of(new OrderItemRequest(dishId, 2)),
     PaymentMethod.STUDENT_CREDIT
 ));
 ```
@@ -291,16 +291,11 @@ mvn -Dtest=*DeliveryTest test
 
 # Tests Cucumber uniquement
 mvn -Dtest=CucumberTest test
-
-# Tests avec couverture JaCoCo
-mvn test jacoco:report
 ```
 
 ### Architecture de Test
 - **Given-When-Then** : Structure BDD claire
 - **Mocks intelligents** : Simulation des dépendances
-- **Données de test** : Jeux de données réalistes
-- **Validation métier** : Tests des règles business
 
 ## Développement
 

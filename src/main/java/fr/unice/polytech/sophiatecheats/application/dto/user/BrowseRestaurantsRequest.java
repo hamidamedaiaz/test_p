@@ -29,9 +29,6 @@ public record BrowseRestaurantsRequest(
         if (minPrice != null && minPrice.compareTo(BigDecimal.ZERO) < 0) {
             return false;
         }
-        if (maxPrice != null && maxPrice.compareTo(BigDecimal.ZERO) < 0) {
-            return false;
-        }
-        return true;
+        return maxPrice == null || maxPrice.compareTo(BigDecimal.ZERO) >= 0;
     }
 }

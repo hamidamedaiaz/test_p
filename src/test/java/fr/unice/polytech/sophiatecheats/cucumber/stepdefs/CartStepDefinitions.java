@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CartStepDefinitions {
 
     private Cart cart;
-    private Map<String, Dish> dishMap = new HashMap<>();
+    private final Map<String, Dish> dishMap = new HashMap<>();
     private String lastError = null;
     private Exception lastException = null;
     private String currentRestaurantName = null;

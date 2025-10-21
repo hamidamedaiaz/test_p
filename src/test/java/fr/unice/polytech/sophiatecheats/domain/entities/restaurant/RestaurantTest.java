@@ -317,8 +317,8 @@ class RestaurantTest {
         assertEquals(id, restaurant.getId());
         assertEquals(name, restaurant.getName());
         assertEquals(address, restaurant.getAddress());
-        assertEquals(schedule.getOpeningTime(), restaurant.getOpeningTime());
-        assertEquals(schedule.getClosingTime(), restaurant.getClosingTime());
+        assertEquals(schedule.openingTime(), restaurant.getOpeningTime());
+        assertEquals(schedule.closingTime(), restaurant.getClosingTime());
         assertEquals(1, restaurant.getMenu().size());
         assertFalse(restaurant.isOpen());
     }
@@ -344,7 +344,7 @@ class RestaurantTest {
                 () -> restaurant.setSchedule(LocalTime.of(22, 0), LocalTime.of(9, 0)));
 
         assertThrows(IllegalArgumentException.class,
-                () -> restaurant.setSchedule((Schedule) null));
+                () -> restaurant.setSchedule(null));
     }
 
     @Test
