@@ -142,9 +142,7 @@ public class EndToEndUserFlowDemo {
         Restaurant restaurant = restaurantRepo.findAll().get(0);
 
         // Ajouter pizza au panier
-        Dish pizza = restaurant.getMenu().stream()
-            .filter(dish -> dish.getName().contains("Pizza"))
-            .findFirst().orElseThrow();
+        Dish pizza = restaurant.getMenu().get(0);
 
         AddDishToCartRequest pizzaRequest = new AddDishToCartRequest(user.getId(), pizza.getId(), 1);
         AddDishToCartResponse pizzaResponse = addToCartUseCase.execute(pizzaRequest);
@@ -153,9 +151,7 @@ public class EndToEndUserFlowDemo {
         System.out.println("   Sous-total: " + pizzaResponse.totalAmount() + "€");
 
         // Ajouter salade au panier
-        Dish salade = restaurant.getMenu().stream()
-            .filter(dish -> dish.getName().contains("Salade"))
-            .findFirst().orElseThrow();
+        Dish salade = restaurant.getMenu().get(1);
 
         AddDishToCartRequest saladeRequest = new AddDishToCartRequest(user.getId(), salade.getId(), 1);
         AddDishToCartResponse saladeResponse = addToCartUseCase.execute(saladeRequest);
