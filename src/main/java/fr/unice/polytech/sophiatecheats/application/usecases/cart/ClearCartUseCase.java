@@ -1,35 +1,35 @@
 package fr.unice.polytech.sophiatecheats.application.usecases.cart;
 
-
-import fr.unice.polytech.sophiatecheats.application.dto.user.ClearCartResponse;
+import fr.unice.polytech.sophiatecheats.application.dto.AddDishToCartResponse;
 import fr.unice.polytech.sophiatecheats.application.usecases.UseCase;
 import fr.unice.polytech.sophiatecheats.domain.entities.cart.Cart;
 import fr.unice.polytech.sophiatecheats.domain.repositories.CartRepository;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.EntityNotFoundException;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.ValidationException;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
  * Use case pour vider complètement le panier.
  *
  * <p>Ce use case permet de supprimer tous les articles du panier
- * en une seule opération, sans supprimer le panier lui-même.</p>
+ * en une seule opération.</p>
  *
  * @author SophiaTech Eats Backend Team
  * @since 1.0
  */
-public class ClearCartUseCase implements UseCase<UUID, ClearCartResponse> {
+public class ClearCartUseCase implements UseCase<UUID, AddDishToCartResponse> {
 
     private final CartRepository cartRepository;
+
 
     public ClearCartUseCase(CartRepository cartRepository) {
         this.cartRepository = cartRepository;
     }
 
+
     @Override
-    public ClearCartResponse execute(UUID userId) {
+    public AddDishToCartResponse execute(UUID userId) {
         try {
             Cart cart = cartRepository.findActiveCartByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -39,16 +39,15 @@ public class ClearCartUseCase implements UseCase<UUID, ClearCartResponse> {
 
             cartRepository.save(cart);
 
-            return new ClearCartResponse(
+            return new AddDishToCartResponse(
                 cart.getId(),
-                0,
-                BigDecimal.ZERO,
-                true,
-                "Panier vidé avec succès"
+                cart.getTotalItems(),
+                cart.calculateTotal(),
+                true
             );
 
         } catch (EntityNotFoundException e) {
-            return createErrorResponse("Panier introuvable: " + e.getMessage());
+            return createErrorResponse("Entité non trouvée: " + e.getMessage());
         } catch (ValidationException e) {
             return createErrorResponse("Erreur de validation: " + e.getMessage());
         } catch (Exception e) {
@@ -56,13 +55,13 @@ public class ClearCartUseCase implements UseCase<UUID, ClearCartResponse> {
         }
     }
 
-    private ClearCartResponse createErrorResponse(String errorMessage) {
-        return new ClearCartResponse(
+
+    private AddDishToCartResponse createErrorResponse(String errorMessage) {
+        return new AddDishToCartResponse(
             null,
             0,
-            BigDecimal.ZERO,
-            false,
-            errorMessage
+            java.math.BigDecimal.ZERO,
+            false
         );
     }
 }

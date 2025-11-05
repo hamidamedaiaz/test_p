@@ -1,8 +1,5 @@
 package fr.unice.polytech.sophiatecheats.domain.entities.user;
 
-import fr.unice.polytech.sophiatecheats.domain.entities.cart.Cart;
-import fr.unice.polytech.sophiatecheats.domain.entities.restaurant.Restaurant;
-import fr.unice.polytech.sophiatecheats.domain.exceptions.InsufficientCreditException;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,14 +21,14 @@ public class User {
     private final String name;
     private final String email;
     private BigDecimal studentCredit;
-    private Cart cart;
+    private String phoneNumber;
+
 
     public User(String email, String name) {
         this.id = UUID.randomUUID();
         this.email = email;
         this.name = name;
         this.studentCredit = BigDecimal.ZERO;
-        this.cart = new Cart(this.id);
     }
 
     public User(UUID id, String email, String name, BigDecimal studentCredit) {
@@ -39,7 +36,6 @@ public class User {
         this.email = email;
         this.name = name;
         this.studentCredit = studentCredit != null ? studentCredit : BigDecimal.ZERO;
-        this.cart = new Cart(this.id);
     }
 
     // Getters
@@ -74,7 +70,7 @@ public class User {
         if (amount != null && hasEnoughCredit(amount)) {
             this.studentCredit = this.studentCredit.subtract(amount);
         } else {
-            throw new InsufficientCreditException("Insufficient credit");
+            throw new IllegalArgumentException("Insufficient credit");
         }
     }
 
@@ -100,4 +96,9 @@ public class User {
                 ", studentCredit=" + studentCredit +
                 '}';
     }
+
+    public void setPhoneNumber(String s) {
+    }
+
+
 }

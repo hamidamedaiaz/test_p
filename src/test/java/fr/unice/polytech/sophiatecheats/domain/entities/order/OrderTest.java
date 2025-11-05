@@ -21,14 +21,7 @@ class OrderTest {
 
         User user = new User("test@example.com", "John Doe");
         Restaurant restaurant = new Restaurant("Test Restaurant", "123 Main St");
-        Dish dish = Dish.builder()
-            .id(UUID.randomUUID())
-            .name("Tacos")
-            .description("Delicious tacos")
-            .price(BigDecimal.valueOf(8.50))
-            .category(DishCategory.MAIN_COURSE)
-            .available(true)
-            .build();
+        Dish dish = new Dish(UUID.randomUUID(), "Tacos", "Delicious tacos", BigDecimal.valueOf(8.50), DishCategory.MAIN_COURSE, true);
         OrderItem item = new OrderItem(dish, 2);
         List<OrderItem> items = List.of(item);
 
@@ -48,22 +41,8 @@ class OrderTest {
         User user = new User("test@example.com", "John Doe");
         Restaurant restaurant = new Restaurant("Test Restaurant", "123 Main St");
 
-        Dish dish1 = Dish.builder()
-            .id(UUID.randomUUID())
-            .name("Tacos")
-            .description("Delicious tacos")
-            .price(BigDecimal.valueOf(8.50))
-            .category(DishCategory.MAIN_COURSE)
-            .available(true)
-            .build();
-        Dish dish2 = Dish.builder()
-            .id(UUID.randomUUID())
-            .name("Burger")
-            .description("Tasty burger")
-            .price(BigDecimal.valueOf(12.00))
-            .category(DishCategory.MAIN_COURSE)
-            .available(true)
-            .build();
+        Dish dish1 = new Dish(UUID.randomUUID(), "Tacos", "Delicious tacos", BigDecimal.valueOf(8.50), DishCategory.MAIN_COURSE, true);
+        Dish dish2 = new Dish(UUID.randomUUID(), "Burger", "Tasty burger", BigDecimal.valueOf(12.00), DishCategory.MAIN_COURSE, true);
 
         OrderItem item1 = new OrderItem(dish1, 2);
         OrderItem item2 = new OrderItem(dish2, 1);

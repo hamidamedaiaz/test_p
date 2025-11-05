@@ -20,9 +20,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class InMemoryCartRepository extends InMemoryRepository<Cart, UUID> implements CartRepository {
 
-    private final Map<UUID, UUID> userCartMapping;
-    private final Map<UUID, LocalDateTime> cartLastActivity;
-    private static final int EXPIRY_MINUTES = 5;  // Panier expire après 5 minutes d'inactivité
+    private final Map<UUID, UUID> userCartMapping; // userId -> cartId
+    private final Map<UUID, LocalDateTime> cartLastActivity; // cartId -> lastActivity
+    private static final int EXPIRY_HOURS = 24;
+    private final Map<UUID, Cart> carts = new ConcurrentHashMap<>();
 
 
     public InMemoryCartRepository() {
@@ -90,7 +91,7 @@ public class InMemoryCartRepository extends InMemoryRepository<Cart, UUID> imple
 
     @Override
     public int deleteExpiredCarts() {
-        LocalDateTime expiryThreshold = LocalDateTime.now().minusMinutes(EXPIRY_MINUTES);
+        LocalDateTime expiryThreshold = LocalDateTime.now().minusHours(EXPIRY_HOURS);
         int deletedCount = 0;
 
         // Trouver les paniers expirés
@@ -111,13 +112,6 @@ public class InMemoryCartRepository extends InMemoryRepository<Cart, UUID> imple
     @Override
     public boolean hasActiveCart(UUID userId) {
         return findActiveCartByUserId(userId).isPresent();
-    }
-
-    @Override
-    public void delete(Cart cart) {
-        if (cart != null && cart.getId() != null) {
-            deleteById(cart.getId());
-        }
     }
 
 }

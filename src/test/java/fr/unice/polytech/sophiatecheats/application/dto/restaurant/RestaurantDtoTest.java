@@ -1,12 +1,10 @@
 package fr.unice.polytech.sophiatecheats.application.dto.restaurant;
 
-import fr.unice.polytech.sophiatecheats.application.dto.restaurant.management.DishDto;
 import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -159,8 +157,7 @@ class RestaurantDtoTest {
             "Description",
             new BigDecimal("10.50"),
             DishCategory.MAIN_COURSE,
-            true,
-            new HashSet<>()
+            true
         );
         
         RestaurantDto dto = new RestaurantDto(

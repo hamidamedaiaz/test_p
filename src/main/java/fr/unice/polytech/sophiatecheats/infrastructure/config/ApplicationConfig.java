@@ -1,27 +1,22 @@
 package fr.unice.polytech.sophiatecheats.infrastructure.config;
 
-import fr.unice.polytech.sophiatecheats.application.usecases.user.order.PlaceOrderUseCase;
 import fr.unice.polytech.sophiatecheats.application.usecases.order.ConfirmOrderUseCase;
-import fr.unice.polytech.sophiatecheats.application.usecases.order.SelectDeliverySlotUseCase;
-import fr.unice.polytech.sophiatecheats.application.usecases.user.BrowseRestaurantsUseCase;
-import fr.unice.polytech.sophiatecheats.application.usecases.restaurant.AddDishToRestaurantUseCase;
-import fr.unice.polytech.sophiatecheats.application.usecases.restaurant.UpdateDishUseCase;
-import fr.unice.polytech.sophiatecheats.application.usecases.restaurant.RemoveDishFromRestaurantUseCase;
+import fr.unice.polytech.sophiatecheats.application.usecases.order.DeliverOrderUseCase;
+import fr.unice.polytech.sophiatecheats.application.usecases.order.PlaceOrderUseCase;
+import fr.unice.polytech.sophiatecheats.application.usecases.restaurant.BrowseRestaurantsUseCase;
 import fr.unice.polytech.sophiatecheats.application.usecases.cart.*;
 import fr.unice.polytech.sophiatecheats.domain.repositories.OrderRepository;
 import fr.unice.polytech.sophiatecheats.domain.repositories.UserRepository;
 import fr.unice.polytech.sophiatecheats.domain.repositories.RestaurantRepository;
 import fr.unice.polytech.sophiatecheats.domain.repositories.CartRepository;
+import fr.unice.polytech.sophiatecheats.domain.services.*;
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryOrderRepository;
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryRestaurantRepository;
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryUserRepository;
 import fr.unice.polytech.sophiatecheats.infrastructure.repositories.memory.InMemoryCartRepository;
-import fr.unice.polytech.sophiatecheats.domain.services.photoai.PhotoAnalysisService;
-import fr.unice.polytech.sophiatecheats.infrastructure.external.MockAIPhotoAnalysisService;
+import fr.unice.polytech.sophiatecheats.infrastructure.services.*;
 import org.picocontainer.DefaultPicoContainer;
 import org.picocontainer.MutablePicoContainer;
-import org.picocontainer.behaviors.Caching;
-
 
 /**
  * Central application configuration managing dependency injection for the SophiaTech Eats system.
@@ -46,7 +41,7 @@ public class ApplicationConfig {
   private final MutablePicoContainer container;
 
   public ApplicationConfig() {
-    this.container = new DefaultPicoContainer(new Caching());
+    this.container = new DefaultPicoContainer();
     configure();
   }
 
@@ -55,35 +50,33 @@ public class ApplicationConfig {
    * Enregistre les implementations concrètes pour les interfaces.
    */
   private void configure() {
-    // Repositories - using caching behavior for singleton instances
+    // Repositories
     container.addComponent(UserRepository.class, InMemoryUserRepository.class);
     container.addComponent(RestaurantRepository.class, InMemoryRestaurantRepository.class);
     container.addComponent(OrderRepository.class, InMemoryOrderRepository.class);
     container.addComponent(CartRepository.class, InMemoryCartRepository.class);
 
-    // Services
-    container.addComponent(PhotoAnalysisService.class, MockAIPhotoAnalysisService.class);
+    // Services - Register concrete implementations
+    container.addComponent(PaymentService.class);
+    container.addComponent(EmailService.class, EmailServiceImpl.class);
+    container.addComponent(SmsService.class, SmsServiceImpl.class);
+    container.addComponent(PushNotificationService.class, PushNotificationServiceImpl.class);
+    container.addComponent(NotificationService.class, MultiChannelNotificationService.class);
 
-    // Use Cases
-    container.addComponent(BrowseRestaurantsUseCase.class);
+    // Use Cases - Order Management
     container.addComponent(PlaceOrderUseCase.class);
-
-    // Order Flow Use Cases - Complete order→slot→payment sequence
-    container.addComponent(SelectDeliverySlotUseCase.class);
     container.addComponent(ConfirmOrderUseCase.class);
-    
+    container.addComponent(DeliverOrderUseCase.class);
 
-    // Cart Use Cases - Now using the corrected AddDishToCartUseCase
+    // Use Cases - Restaurant Browsing
+    container.addComponent(BrowseRestaurantsUseCase.class);
+
+    // Use Cases - Cart Management
     container.addComponent(AddDishToCartUseCase.class);
     container.addComponent(UpdateCartItemUseCase.class);
     container.addComponent(RemoveFromCartUseCase.class);
     container.addComponent(GetCartUseCase.class);
     container.addComponent(ClearCartUseCase.class);
-
-    // Dish Management Use Cases - Restaurant Administration
-    container.addComponent(AddDishToRestaurantUseCase.class);
-    container.addComponent(UpdateDishUseCase.class);
-    container.addComponent(RemoveDishFromRestaurantUseCase.class);
   }
 
   /**
@@ -93,4 +86,10 @@ public class ApplicationConfig {
     return container.getComponent(clazz);
   }
 
+  /**
+   * Enregistre manuellement un composant.
+   */
+  public <T> void registerComponent(Class<T> interfaceClass, Class<? extends T> implementationClass) {
+    container.addComponent(interfaceClass, implementationClass);
+  }
 }

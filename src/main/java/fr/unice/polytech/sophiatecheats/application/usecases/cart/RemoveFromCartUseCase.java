@@ -1,12 +1,13 @@
 package fr.unice.polytech.sophiatecheats.application.usecases.cart;
 
-import fr.unice.polytech.sophiatecheats.application.dto.user.AddDishToCartResponse;
-import fr.unice.polytech.sophiatecheats.application.dto.user.RemoveFromCartRequest;
+import fr.unice.polytech.sophiatecheats.application.dto.AddDishToCartResponse;
 import fr.unice.polytech.sophiatecheats.application.usecases.UseCase;
 import fr.unice.polytech.sophiatecheats.domain.entities.cart.Cart;
 import fr.unice.polytech.sophiatecheats.domain.repositories.CartRepository;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.EntityNotFoundException;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.ValidationException;
+
+import java.util.UUID;
 
 /**
  * Use case pour supprimer un plat du panier.

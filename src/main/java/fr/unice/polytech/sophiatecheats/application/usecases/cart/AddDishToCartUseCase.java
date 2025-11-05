@@ -1,115 +1,96 @@
 package fr.unice.polytech.sophiatecheats.application.usecases.cart;
 
-import fr.unice.polytech.sophiatecheats.application.dto.user.AddDishToCartRequest;
-import fr.unice.polytech.sophiatecheats.application.dto.user.AddDishToCartResponse;
+import fr.unice.polytech.sophiatecheats.application.dto.AddDishToCartRequest;
+import fr.unice.polytech.sophiatecheats.application.dto.AddDishToCartResponse;
 import fr.unice.polytech.sophiatecheats.application.usecases.UseCase;
 import fr.unice.polytech.sophiatecheats.domain.entities.cart.Cart;
 import fr.unice.polytech.sophiatecheats.domain.entities.restaurant.Dish;
-import fr.unice.polytech.sophiatecheats.domain.entities.restaurant.Restaurant;
 import fr.unice.polytech.sophiatecheats.domain.entities.user.User;
 import fr.unice.polytech.sophiatecheats.domain.repositories.CartRepository;
-import fr.unice.polytech.sophiatecheats.domain.repositories.UserRepository;
-import fr.unice.polytech.sophiatecheats.domain.repositories.RestaurantRepository;
+import fr.unice.polytech.sophiatecheats.domain.repositories.Repository;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.EntityNotFoundException;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.ValidationException;
-import fr.unice.polytech.sophiatecheats.domain.exceptions.CannotMixRestaurantsException;
 
-import java.math.BigDecimal;
 import java.util.UUID;
+
 
 public class AddDishToCartUseCase implements UseCase<AddDishToCartRequest, AddDishToCartResponse> {
 
-    private final UserRepository userRepository;
-    private final RestaurantRepository restaurantRepository;
+    private final Repository<User, UUID> userRepository;
+    private final Repository<Dish, UUID> dishRepository;
     private final CartRepository cartRepository;
 
-    public AddDishToCartUseCase(UserRepository userRepository,
-                                RestaurantRepository restaurantRepository,
-                                CartRepository cartRepository) {
+
+    public AddDishToCartUseCase(Repository<User, UUID> userRepository,
+                               Repository<Dish, UUID> dishRepository,
+                               CartRepository cartRepository) {
         this.userRepository = userRepository;
-        this.restaurantRepository = restaurantRepository;
+        this.dishRepository = dishRepository;
         this.cartRepository = cartRepository;
     }
 
+
     @Override
     public AddDishToCartResponse execute(AddDishToCartRequest request) {
-        try {
-            // Récupérer l'utilisateur (pour vérification et interaction avec le mock)
+            try {
             User user = validateAndGetUser(request.userId());
-
             Dish dish = validateAndGetDish(request.dishId());
-
-            // Trouver le restaurant du plat
-            Restaurant restaurant = findRestaurantByDishId(request.dishId());
 
             Cart cart = getOrCreateActiveCart(request.userId());
 
-            // Ajouter le plat avec l'ID du restaurant
-            cart.addDish(dish, request.quantity(), restaurant.getId());
+            cart.addDish(dish, request.quantity());
 
             cartRepository.save(cart);
 
             return new AddDishToCartResponse(
-                    cart.getId(),
-                    cart.getTotalItems(),
-                    cart.calculateTotal(),
-                    true
+                cart.getId(),
+                cart.getTotalItems(),
+                cart.calculateTotal(),
+                true
             );
 
-        } catch (CannotMixRestaurantsException e) {
-            // Gérer spécifiquement l'erreur de mélange de restaurants
-            System.out.println("[AddDishToCartUseCase] Failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
-            return new AddDishToCartResponse(
-                    null,
-                    0,
-                    BigDecimal.ZERO,
-                    false
-            );
-        } catch (ValidationException | EntityNotFoundException e) {
-            System.out.println("[AddDishToCartUseCase] Failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
-            return new AddDishToCartResponse(
-                    null,
-                    0,
-                    BigDecimal.ZERO,
-                    false
-            );
+        } catch (EntityNotFoundException e) {
+            return createErrorResponse("Entité non trouvée: " + e.getMessage());
+        } catch (ValidationException e) {
+            return createErrorResponse("Erreur de validation: " + e.getMessage());
+        } catch (Exception e) {
+            return createErrorResponse("Erreur inattendue: " + e.getMessage());
         }
     }
 
+
     private User validateAndGetUser(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Utilisateur non trouvé avec l'ID: " + userId));
     }
 
     private Dish validateAndGetDish(UUID dishId) {
-        System.out.println("[AddDishToCartUseCase] Searching dishId=" + dishId);
-        // Appeler findAll() une seule fois et réutiliser la liste pour le debug et la recherche
-        var restaurants = restaurantRepository.findAll();
-        restaurants.forEach(r -> {
-            System.out.println("[AddDishToCartUseCase] Restaurant=" + r.getName() + " dishes=" + r.getMenu().size());
-            r.getMenu().forEach(d -> System.out.println("  - Dish name=" + d.getName() + " id=" + d.getId()));
-        });
+        Dish dish = dishRepository.findById(dishId)
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Plat non trouvé avec l'ID: " + dishId));
 
-        return restaurants.stream()
-                .flatMap(restaurant -> restaurant.getMenu().stream())
-                .filter(dish -> dish.getId().equals(dishId))
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Dish not found with ID: " + dishId));
+        if (!dish.isAvailable()) {
+            throw new ValidationException(
+                "Le plat '" + dish.getName() + "' n'est pas disponible actuellement");
+        }
+
+        return dish;
     }
 
-    /**
-     *  Trouve le restaurant qui possède un plat spécifique.
-     */
-    private Restaurant findRestaurantByDishId(UUID dishId) {
-        return restaurantRepository.findAll().stream()
-                .filter(restaurant -> restaurant.getMenu().stream()
-                        .anyMatch(dish -> dish.getId().equals(dishId)))
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found for dish with ID: " + dishId));
-    }
 
     private Cart getOrCreateActiveCart(UUID userId) {
         return cartRepository.findActiveCartByUserId(userId)
-                .orElseGet(() -> new Cart(userId));
+            .orElseGet(() -> new Cart(userId));
+    }
+
+
+    private AddDishToCartResponse createErrorResponse(String errorMessage) {
+        return new AddDishToCartResponse(
+            null,
+            0,
+            java.math.BigDecimal.ZERO,
+            false
+        );
     }
 }

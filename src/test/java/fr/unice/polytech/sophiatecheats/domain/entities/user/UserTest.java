@@ -1,6 +1,5 @@
 package fr.unice.polytech.sophiatecheats.domain.entities.user;
 
-import fr.unice.polytech.sophiatecheats.domain.exceptions.InsufficientCreditException;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -103,7 +102,7 @@ class UserTest {
         BigDecimal amountToDeduct = new BigDecimal("30.00");
 
         // When & Then
-        assertThrows(InsufficientCreditException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             user.deductCredit(amountToDeduct);
         });
     }

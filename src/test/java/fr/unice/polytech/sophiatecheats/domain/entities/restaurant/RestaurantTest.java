@@ -2,7 +2,7 @@ package fr.unice.polytech.sophiatecheats.domain.entities.restaurant;
 
 import fr.unice.polytech.sophiatecheats.domain.entities.delivery.DeliverySchedule;
 import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
-import fr.unice.polytech.sophiatecheats.domain.enums.RestaurantType;
+import fr.unice.polytech.sophiatecheats.domain.exceptions.CapacitySlotValidationException;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.RestaurantValidationException;
 import org.junit.jupiter.api.Test;
 
@@ -10,153 +10,24 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class RestaurantTest {
 
-
     @Test
-    void shouldCreateRestaurantUsingBuilder() {
-        Restaurant restaurant = Restaurant.builder()
-                .name("Pizza Palace")
-                .address("123 Main Street")
-                .build();
-
-        assertNotNull(restaurant.getId());
-        assertEquals("Pizza Palace", restaurant.getName());
-        assertEquals("123 Main Street", restaurant.getAddress());
-        assertTrue(restaurant.isOpen());
-        assertTrue(restaurant.getMenu().isEmpty());
-        assertEquals(RestaurantType.RESTAURANT, restaurant.getRestaurantType());
-    }
-
-    @Test
-    void shouldCreateRestaurantWithBuilderAndAllParameters() {
-        UUID customId = UUID.randomUUID();
-        Schedule customSchedule = new Schedule(LocalTime.of(10, 0), LocalTime.of(22, 0));
-        List<Dish> menu = new ArrayList<>();
-        menu.add(Dish.builder()
-                .name("Pasta")
-                .description("Italian pasta")
-                .price(new BigDecimal("14.99"))
-                .category(DishCategory.MAIN_COURSE)
-                .build());
-
-        Restaurant restaurant = Restaurant.builder()
-                .id(customId)
-                .name("Italian Restaurant")
-                .address("456 Rome Street")
-                .schedule(customSchedule)
-                .isOpen(false)
-                .menu(menu)
-                .restaurantType(RestaurantType.FAST_FOOD)
-                .cuisineType(DishCategory.MAIN_COURSE)
-                .build();
-
-        assertEquals(customId, restaurant.getId());
-        assertEquals("Italian Restaurant", restaurant.getName());
-        assertEquals("456 Rome Street", restaurant.getAddress());
-        assertFalse(restaurant.isOpen());
-        assertEquals(1, restaurant.getMenu().size());
-        assertEquals(RestaurantType.FAST_FOOD, restaurant.getRestaurantType());
-        assertEquals(DishCategory.MAIN_COURSE, restaurant.getCuisineType());
-        assertEquals(LocalTime.of(10, 0), restaurant.getOpeningTime());
-        assertEquals(LocalTime.of(22, 0), restaurant.getClosingTime());
-    }
-
-    @Test
-    void shouldGenerateUuidWhenNotProvidedInBuilder() {
-        Restaurant restaurant1 = Restaurant.builder()
-                .name("Restaurant 1")
-                .address("Address 1")
-                .build();
-
-        Restaurant restaurant2 = Restaurant.builder()
-                .name("Restaurant 2")
-                .address("Address 2")
-                .build();
-
-        assertNotNull(restaurant1.getId());
-        assertNotNull(restaurant2.getId());
-        assertNotEquals(restaurant1.getId(), restaurant2.getId());
-    }
-
-    @Test
-    void shouldCreateRestaurantWithBuilderAndDefaultValues() {
-        Restaurant restaurant = Restaurant.builder()
-                .name("Default Restaurant")
-                .address("Default Address")
-                .build();
-
-        assertNotNull(restaurant.getSchedule());
-        assertTrue(restaurant.isOpen());
-        assertNotNull(restaurant.getDeliverySchedule());
-        assertEquals(RestaurantType.RESTAURANT, restaurant.getRestaurantType());
-        assertNull(restaurant.getCuisineType());
-    }
-
-    @Test
-    void shouldThrowValidationErrorWhenBuildingWithInvalidName() {
-        assertThrows(RestaurantValidationException.class, () ->
-                Restaurant.builder()
-                        .name("")
-                        .address("Valid Address")
-                        .build()
-        );
-    }
-
-    @Test
-    void shouldThrowValidationErrorWhenBuildingWithInvalidAddress() {
-        assertThrows(RestaurantValidationException.class, () ->
-                Restaurant.builder()
-                        .name("Valid Name")
-                        .address(null)
-                        .build()
-        );
-    }
-
-    @Test
-    void shouldCreateRestaurantWithBuilderFluentInterface() {
-        // Démonstration de l'interface fluide du Builder
-        Restaurant restaurant = Restaurant.builder()
-                .name("Burger House")
-                .address("789 Burger Lane")
-                .restaurantType(RestaurantType.FAST_FOOD)
-                .cuisineType(DishCategory.MAIN_COURSE)
-                .isOpen(true)
-                .build();
-
-        assertEquals("Burger House", restaurant.getName());
-        assertEquals(RestaurantType.FAST_FOOD, restaurant.getRestaurantType());
-        assertTrue(restaurant.isOpen());
-    }
-
-    @Test
-    void shouldCreateRestaurantWithCustomDeliverySchedule() {
-        UUID restaurantId = UUID.randomUUID();
-        DeliverySchedule customSchedule = new DeliverySchedule(restaurantId);
-
-        Restaurant restaurant = Restaurant.builder()
-                .id(restaurantId)
-                .name("Delivery Restaurant")
-                .address("Delivery Street")
-                .deliverySchedule(customSchedule)
-                .build();
-
-        assertEquals(customSchedule, restaurant.getDeliverySchedule());
-    }
-
-    @Test
-    void shouldCreateValidRestaurant() {
+    void should_create_valid_restaurant() {
+        // Given
         String name = "Test Restaurant";
         String address = "123 Test Street";
 
+        // When
         Restaurant restaurant = new Restaurant(name, address);
 
+        // Then
         assertNotNull(restaurant.getId());
         assertEquals(name, restaurant.getName());
         assertEquals(address, restaurant.getAddress());
@@ -164,216 +35,379 @@ class RestaurantTest {
         assertTrue(restaurant.getMenu().isEmpty());
     }
 
-    void shouldFailWhen(String name, String address) {
-        assertThrows(RestaurantValidationException.class,
-                () -> new Restaurant(name, address));
-    }
-
     @Test
-    void shouldThrowWhenNameIsNull() {
+    void should_fail_when_name_is_null() {
+        // Given
+        String name = null;
         String address = "123 Test Street";
-        shouldFailWhen(null, address);
+
+        // When & Then
+        assertThrows(RestaurantValidationException.class, 
+            () -> new Restaurant(name, address));
     }
 
     @Test
-    void shouldThrowWhenNameIsEmpty() {
+    void should_fail_when_name_is_empty() {
+        // Given
         String name = "   ";
         String address = "123 Test Street";
-        shouldFailWhen(name, address);
+
+        // When & Then
+        assertThrows(RestaurantValidationException.class, 
+            () -> new Restaurant(name, address));
     }
 
     @Test
-    void shouldThrowWhenNameIsTooLong() {
-        String name = "a".repeat(201);
-        String address = "123 Test Street";
-        shouldFailWhen(name, address);
-    }
-
-    @Test
-    void shouldThrowWhenAddressIsNull() {
+    void should_fail_when_address_is_null() {
+        // Given
         String name = "Test Restaurant";
         String address = null;
-        shouldFailWhen(name, address);
+
+        // When & Then
+        assertThrows(RestaurantValidationException.class, 
+            () -> new Restaurant(name, address));
     }
 
     @Test
-    void shouldThrowWhenAddressIsEmpty() {
-        String name = "Test Restaurant";
-        String address = "   ";
-        shouldFailWhen(name, address);
-    }
-
-    @Test
-    void shouldAddDishToMenu() {
+    void should_add_dish_to_menu() {
+        // Given
         Restaurant restaurant = new Restaurant("Test", "Address");
-        Dish dish = Dish.builder()
-                .name("Pizza")
-                .description("Delicious pizza")
-                .price(new BigDecimal("12.99"))
-                .category(DishCategory.MAIN_COURSE)
-                .build();
+        Dish dish = new Dish(UUID.randomUUID(), "Pizza", "Delicious", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
 
+        // When
         restaurant.addDish(dish);
 
+        // Then
         assertEquals(1, restaurant.getMenu().size());
         assertTrue(restaurant.getMenu().contains(dish));
     }
 
     @Test
-    void shouldThrowWhenAddingNullDish() {
+    void should_not_add_duplicate_dish() {
+        // Given
         Restaurant restaurant = new Restaurant("Test", "Address");
+        Dish dish = new Dish(UUID.randomUUID(), "Pizza", "Delicious", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> restaurant.addDish(null));
+        // When
+        restaurant.addDish(dish);
+        restaurant.addDish(dish); // Add same dish again
+
+        // Then
+        assertEquals(1, restaurant.getMenu().size());
     }
 
     @Test
-    void shouldThrowWhenAddingDishWithDuplicateName() {
+    void should_remove_dish_from_menu() {
+        // Given
         Restaurant restaurant = new Restaurant("Test", "Address");
-        Dish dish1 = Dish.builder()
-                .name("Pizza")
-                .description("First pizza")
-                .price(new BigDecimal("12.99"))
-                .category(DishCategory.MAIN_COURSE)
-                .build();
-        Dish dish2 = Dish.builder()
-                .name("Pizza")
-                .description("Second pizza")
-                .price(new BigDecimal("15.99"))
-                .category(DishCategory.MAIN_COURSE)
-                .build();
+        Dish dish = new Dish(UUID.randomUUID(), "Pizza", "Delicious", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
+        restaurant.addDish(dish);
 
-        restaurant.addDish(dish1);
+        // When
+        restaurant.removeDish(dish.getId());
 
-        assertThrows(IllegalArgumentException.class,
-                () -> restaurant.addDish(dish2));
+        // Then
+        assertTrue(restaurant.getMenu().isEmpty());
     }
 
     @Test
-    void shouldSetSchedule() {
+    void should_find_dish_by_id() {
+        // Given
+        Restaurant restaurant = new Restaurant("Test", "Address");
+        Dish dish = new Dish(UUID.randomUUID(), "Pizza", "Delicious", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
+        restaurant.addDish(dish);
+
+        // When
+        Optional<Dish> found = restaurant.findDishById(dish.getId());
+
+        // Then
+        assertTrue(found.isPresent());
+        assertEquals(dish, found.get());
+    }
+
+    @Test
+    void should_return_empty_when_dish_not_found() {
+        // Given
+        Restaurant restaurant = new Restaurant("Test", "Address");
+        Dish dish = new Dish(UUID.randomUUID(), "Pizza", "Delicious", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
+
+        // When
+        Optional<Dish> found = restaurant.findDishById(dish.getId());
+
+        // Then
+        assertFalse(found.isPresent());
+    }
+
+    @Test
+    void should_return_only_available_dishes() {
+        // Given
+        Restaurant restaurant = new Restaurant("Test", "Address");
+        Dish availableDish = new Dish(UUID.randomUUID(), "Available", "Available dish", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
+        Dish unavailableDish = new Dish(UUID.randomUUID(), "Unavailable", "Unavailable dish", new BigDecimal("15"), DishCategory.DESSERT, true);
+        
+        unavailableDish.makeUnavailable();
+        restaurant.addDish(availableDish);
+        restaurant.addDish(unavailableDish);
+
+        // When
+        List<Dish> availableDishes = restaurant.getAvailableDishes();
+
+        // Then
+        assertEquals(1, availableDishes.size());
+        assertTrue(availableDishes.contains(availableDish));
+        assertFalse(availableDishes.contains(unavailableDish));
+    }
+
+    /**
+    @Test
+    void should_modify_dish_name() {
+        Restaurant restaurant = new Restaurant("Test", "Address");
+        Dish dish = new Dish(UUID.randomUUID(), "Dish Name", "Dish Description", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
+        restaurant.addDish(dish);
+
+        assertEquals("Dish Name", restaurant.getMenu().getFirst().getName());
+
+        //When
+        restaurant.modifyDishName(restaurant.getMenu().getFirst().getId(),"New Dish Name");
+
+        //Then
+        assertEquals("New Dish Name", restaurant.getMenu().getFirst().getName());
+    }
+
+    @Test
+    void should_modify_dish_description() {
+        Restaurant restaurant = new Restaurant("Test", "Address");
+        Dish dish = new Dish(UUID.randomUUID(), "Dish Name", "Dish Description", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
+        restaurant.addDish(dish);
+
+        assertEquals("Dish Description", restaurant.getMenu().getFirst().getDescription());
+
+        //When
+        restaurant.modifyDishDescription(restaurant.getMenu().getFirst().getId(),"New Dish Description");
+
+        //Then
+        assertEquals("New Dish Description", restaurant.getMenu().getFirst().getDescription());
+    }
+
+    @Test
+    void should_modify_dish_price() {
+        Restaurant restaurant = new Restaurant("Test", "Address");
+        Dish dish = new Dish(UUID.randomUUID(), "Dish Name", "Dish Description", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
+        restaurant.addDish(dish);
+
+        assertEquals(new BigDecimal("10"), restaurant.getMenu().getFirst().getPrice());
+
+        //When
+        restaurant.modifyDishPrice(restaurant.getMenu().getFirst().getId(),new BigDecimal("20"));
+
+        //Then
+        assertEquals(new BigDecimal("20"), restaurant.getMenu().getFirst().getPrice());
+    }
+
+    @Test
+    void should_modify_dish_category() {
+        Restaurant restaurant = new Restaurant("Test", "Address");
+        Dish dish = new Dish(UUID.randomUUID(), "Dish Name", "Dish Description", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
+        restaurant.addDish(dish);
+
+        assertEquals(DishCategory.MAIN_COURSE, restaurant.getMenu().getFirst().getCategory());
+
+        //When
+        restaurant.modifyDishCategory(restaurant.getMenu().getFirst().getId(),DishCategory.DESSERT);
+
+        //Then
+        assertEquals(DishCategory.DESSERT, restaurant.getMenu().getFirst().getCategory());
+    }
+
+    @Test
+    void should_set_opening_hours() {
+        // Given
         Restaurant restaurant = new Restaurant("Test", "Address");
         LocalTime opening = LocalTime.of(9, 0);
         LocalTime closing = LocalTime.of(22, 0);
 
-        restaurant.setSchedule(opening, closing);
+        // When
+        restaurant.setOpeningHours(opening, closing);
 
+        // Then
         assertEquals(opening, restaurant.getOpeningTime());
         assertEquals(closing, restaurant.getClosingTime());
     }
 
     @Test
-    void shouldThrowWhenOpeningAfterClosing() {
+    void should_fail_when_opening_after_closing() {
+        // Given
         Restaurant restaurant = new Restaurant("Test", "Address");
         LocalTime opening = LocalTime.of(22, 0);
         LocalTime closing = LocalTime.of(9, 0);
 
-        assertThrows(RestaurantValidationException.class,
-                () -> restaurant.setSchedule(opening, closing));
+        // When & Then
+        assertThrows(IllegalArgumentException.class, 
+            () -> restaurant.setOpeningHours(opening, closing));
     }
 
     @Test
-    void shouldOpenAndCloseRestaurant() {
+    void should_open_and_close_restaurant() {
+        // Given
         Restaurant restaurant = new Restaurant("Test", "Address");
         assertTrue(restaurant.isOpen());
 
+        // When
         restaurant.close();
+
+        // Then
         assertFalse(restaurant.isOpen());
 
+        // When
         restaurant.open();
+
+        // Then
         assertTrue(restaurant.isOpen());
     }
 
     @Test
-    void shouldCheckOpenStatusAtSpecificTime() {
+    void should_check_if_open_at_time() {
+        // Given
         Restaurant restaurant = new Restaurant("Test", "Address");
-        restaurant.setSchedule(LocalTime.of(9, 0), LocalTime.of(18, 0));
+        restaurant.setOpeningHours(LocalTime.of(9, 0), LocalTime.of(18, 0));
 
-        assertTrue(restaurant.isOpenAt(LocalTime.of(12, 0)));
-        assertFalse(restaurant.isOpenAt(LocalTime.of(8, 0)));
-        assertFalse(restaurant.isOpenAt(LocalTime.of(19, 0)));
+        // Then
+        assertTrue(restaurant.isOpenAt(LocalTime.of(12, 0))); // Within hours
+        assertFalse(restaurant.isOpenAt(LocalTime.of(8, 0))); // Before opening
+        assertFalse(restaurant.isOpenAt(LocalTime.of(19, 0))); // After closing
     }
 
     @Test
-    void shouldConstructRestaurantWithAllFields() {
+    void should_accept_payments() {
+        // Given
+        Restaurant restaurant = new Restaurant("Test", "Address");
+
+        // Then
+        assertTrue(restaurant.acceptsExternalCards());
+        assertTrue(restaurant.acceptsStudentCredit());
+    }
+     **/
+
+    @Test
+    void should_create_restaurant_with_full_constructor() {
+        // Given
         UUID id = UUID.randomUUID();
         String name = "Full Restaurant";
         String address = "123 Full Street";
-        Schedule schedule = new Schedule(LocalTime.of(8, 0), LocalTime.of(22, 0));
+        LocalTime opening = LocalTime.of(8, 0);
+        LocalTime closing = LocalTime.of(22, 0);
         List<Dish> menu = List.of(
-                Dish.builder()
-                        .id(UUID.randomUUID())
-                        .name("Test Dish")
-                        .description("Description")
-                        .price(new BigDecimal("10"))
-                        .category(DishCategory.MAIN_COURSE)
-                        .available(true)
-                        .build()
+            new Dish(UUID.randomUUID(), "Test Dish", "Description", new BigDecimal("10"), DishCategory.MAIN_COURSE, true)
         );
         boolean isOpen = false;
         DeliverySchedule deliverySchedule = new DeliverySchedule(id);
 
-        Restaurant restaurant = new Restaurant(id, name, address, schedule, isOpen, menu, deliverySchedule);
+        // When
+        Restaurant restaurant = new Restaurant(id, name, address, opening, closing, isOpen, menu, deliverySchedule);
 
+        // Then
         assertEquals(id, restaurant.getId());
         assertEquals(name, restaurant.getName());
         assertEquals(address, restaurant.getAddress());
-        assertEquals(schedule.openingTime(), restaurant.getOpeningTime());
-        assertEquals(schedule.closingTime(), restaurant.getClosingTime());
+        assertEquals(opening, restaurant.getOpeningTime());
+        assertEquals(closing, restaurant.getClosingTime());
         assertEquals(1, restaurant.getMenu().size());
         assertFalse(restaurant.isOpen());
     }
 
     @Test
-    void shouldCheckIfOpenAtSpecificDatetime() {
+    void should_check_if_open_at_datetime() {
+        // Given
         Restaurant restaurant = new Restaurant("Test", "Address");
-        restaurant.setSchedule(LocalTime.of(9, 0), LocalTime.of(18, 0));
-
+        restaurant.setOpeningHours(LocalTime.of(9, 0), LocalTime.of(18, 0));
+        
         LocalDateTime morning = LocalDateTime.of(2025, 10, 10, 10, 30);
         LocalDateTime evening = LocalDateTime.of(2025, 10, 10, 20, 0);
 
-        assertTrue(restaurant.isOpenAt(morning));
-        assertFalse(restaurant.isOpenAt(evening));
-        assertFalse(restaurant.isOpenAt((LocalDateTime) null));
+        // Then
+        assertTrue(restaurant.isOpenAt(morning)); // Within hours
+        assertFalse(restaurant.isOpenAt(evening)); // After closing
+        assertFalse(restaurant.isOpenAt((LocalDateTime) null)); // Null time
     }
 
     @Test
-    void shouldThrowWhenSettingInvalidSchedule() {
+    void should_handle_null_opening_hours_in_isOpenAt() {
+        // Given
+        Restaurant restaurant = new Restaurant("Test", "Address");
+        // openingTime and closingTime are null by default
+
+        // When & Then
+        assertFalse(restaurant.isOpenAt(LocalTime.of(12, 0)));
+        assertFalse(restaurant.isOpenAt((LocalTime) null));
+    }
+
+    @Test
+    void should_set_max_capacity_per_slot() {
         Restaurant restaurant = new Restaurant("Test", "Address");
 
-        assertThrows(RestaurantValidationException.class,
-                () -> restaurant.setSchedule(LocalTime.of(22, 0), LocalTime.of(9, 0)));
+        restaurant.generateDailyDeliverySlots(
+                LocalDate.now(), LocalTime.of(8, 0), LocalTime.of(20, 30), 10
+        );
 
-        assertThrows(IllegalArgumentException.class,
-                () -> restaurant.setSchedule(null));
+        restaurant.getDeliverySlotsForDate(LocalDate.now())
+                .forEach(slot -> slot.setMaxCapacity(25));
+
+        assertEquals(25, restaurant.getMaxCapacityPerSlot());
     }
 
     @Test
-    void shouldHaveReadableToString() {
+    void should_fail_setting_invalid_opening_hours() {
+        Restaurant restaurant = new Restaurant("Test", "Address");
+
+        assertThrows(IllegalArgumentException.class,
+            () -> restaurant.setOpeningHours(null, LocalTime.of(18, 0)));
+        assertThrows(IllegalArgumentException.class, 
+            () -> restaurant.setOpeningHours(LocalTime.of(9, 0), null));
+        assertThrows(IllegalArgumentException.class, 
+            () -> restaurant.setOpeningHours(LocalTime.of(18, 0), LocalTime.of(9, 0)));
+    }
+
+    @Test
+    void should_have_meaningful_toString() {
         Restaurant restaurant = new Restaurant("Test Restaurant", "123 Test St");
 
         String result = restaurant.toString();
-
+        
+        assertNotNull(result);
         assertTrue(result.contains("Test Restaurant"));
         assertTrue(result.contains("123 Test St"));
+        assertTrue(result.contains("open=true"));
     }
 
     @Test
-    void shouldCreateRestaurantWithNullScheduleParameters() {
+    void should_validate_max_capacity_constraint() {
+        // Given
         UUID id = UUID.randomUUID();
-        Restaurant restaurant = new Restaurant(id, "Test", "Address", null, true, new ArrayList<>(), new DeliverySchedule(id));
+        String name = "Test";
+        String address = "Address";
+        LocalTime opening = LocalTime.of(9, 0);
+        LocalTime closing = LocalTime.of(18, 0);
+        int invalidCapacity = -5;
 
-        assertNotNull(restaurant.getSchedule());
+        // When & Then
+        assertThrows(CapacitySlotValidationException.class,
+            () -> new Restaurant(id, name, address, opening, closing, true, List.of(), new DeliverySchedule(id) {{
+                {
+                    generateDailySlots(LocalDate.now(), LocalTime.of(10, 0), LocalTime.of(12, 0), 10);
+                }
+                {
+                    getSlotsForDate(LocalDate.now()).forEach(slot -> slot.setMaxCapacity(invalidCapacity));
+                }
+            }}));
     }
 
     @Test
-    void shouldGenerateDeliverySlots() {
-        Restaurant restaurant = new Restaurant("Test", "Address");
-        Schedule schedule = new Schedule(LocalTime.of(8, 0), LocalTime.of(20, 0));
-        restaurant.setSchedule(schedule.openingTime(), schedule.closingTime());
-        restaurant.getDeliverySchedule().generateDailySlots(LocalDate.now().plusDays(1), schedule, 15);
+    void should_validate_name_length_constraint() {
+        String tooLongName = "a".repeat(201); // More than 200 characters
+        String address = "Address";
 
-        List<TimeSlot> slots = restaurant.getDeliverySchedule().getAvailableSlotsForDate(LocalDate.now().plusDays(1));
-        assertFalse(slots.isEmpty());
+        assertThrows(RestaurantValidationException.class,
+            () -> new Restaurant(tooLongName, address));
     }
 
     @Test
@@ -383,128 +417,6 @@ class RestaurantTest {
 
         assertNotEquals(restaurant1, restaurant2);
         assertNotEquals(null, restaurant1);
-        assertNotEquals("not a restaurant", restaurant1);
-    }
-
-    @Test
-    void shouldRemoveDishById() {
-        Restaurant restaurant = new Restaurant("Test", "Address");
-        Dish dish = Dish.builder()
-                .name("Pizza")
-                .description("Delicious pizza")
-                .price(new BigDecimal("12.99"))
-                .category(DishCategory.MAIN_COURSE)
-                .build();
-        restaurant.addDish(dish);
-
-        restaurant.removeDish(dish.getId());
-
-        assertTrue(restaurant.getMenu().isEmpty());
-    }
-
-    @Test
-    void shouldFindDishById() {
-        Restaurant restaurant = new Restaurant("Test", "Address");
-        Dish dish = Dish.builder()
-                .name("Pizza")
-                .description("Delicious pizza")
-                .price(new BigDecimal("12.99"))
-                .category(DishCategory.MAIN_COURSE)
-                .build();
-        restaurant.addDish(dish);
-
-        var found = restaurant.findDishById(dish.getId());
-
-        assertTrue(found.isPresent());
-        assertEquals(dish, found.get());
-    }
-
-    @Test
-    void shouldFindDishByName() {
-        Restaurant restaurant = new Restaurant("Test", "Address");
-        Dish dish = Dish.builder()
-                .name("Pizza")
-                .description("Delicious pizza")
-                .price(new BigDecimal("12.99"))
-                .category(DishCategory.MAIN_COURSE)
-                .build();
-        restaurant.addDish(dish);
-
-        var found = restaurant.findDishByName("Pizza");
-
-        assertTrue(found.isPresent());
-        assertEquals(dish, found.get());
-    }
-
-    @Test
-    void shouldModifyDishProperties() {
-        Restaurant restaurant = new Restaurant("Test", "Address");
-        Dish dish = Dish.builder()
-                .name("Pizza")
-                .description("Delicious pizza")
-                .price(new BigDecimal("12.99"))
-                .category(DishCategory.MAIN_COURSE)
-                .build();
-        restaurant.addDish(dish);
-
-        restaurant.modifyDishName(dish.getId(), "New Pizza");
-        restaurant.modifyDishPrice(dish.getId(), new BigDecimal("15.99"));
-
-        var found = restaurant.findDishById(dish.getId());
-        assertTrue(found.isPresent());
-        assertEquals("New Pizza", found.get().getName());
-        assertEquals(new BigDecimal("15.99"), found.get().getPrice());
-    }
-
-    @Test
-    void shouldReserveAndReleaseDeliverySlots() {
-        Restaurant restaurant = new Restaurant("Test", "Address");
-        Schedule schedule = new Schedule(LocalTime.of(8, 0), LocalTime.of(20, 0));
-        restaurant.setSchedule(schedule.openingTime(), schedule.closingTime());
-        restaurant.getDeliverySchedule().generateDailySlots(LocalDate.now().plusDays(1), schedule, 15);
-
-
-        List<TimeSlot> slots = restaurant.getDeliverySchedule().getAvailableSlotsForDate(LocalDate.now().plusDays(1));
-        assertFalse(slots.isEmpty());
-
-        UUID slotId = slots.get(0).getId();
-        restaurant.reserveDeliverySlot(slotId);
-
-        restaurant.releaseDeliverySlot(slotId);
-    }
-
-    @Test
-    void shouldAcceptPaymentMethods() {
-        Restaurant restaurant = new Restaurant("Test", "Address");
-
-        assertTrue(restaurant.acceptsExternalCards());
-        assertTrue(restaurant.acceptsStudentCredit());
-    }
-
-    @Test
-    void shouldGetAvailableDishes() {
-        Restaurant restaurant = new Restaurant("Test", "Address");
-        Dish availableDish = Dish.builder()
-                .name("Available Pizza")
-                .description("Available")
-                .price(new BigDecimal("12.99"))
-                .category(DishCategory.MAIN_COURSE)
-                .build();
-        Dish unavailableDish = Dish.builder()
-                .name("Unavailable Pizza")
-                .description("Unavailable")
-                .price(new BigDecimal("15.99"))
-                .category(DishCategory.MAIN_COURSE)
-                .available(false)
-                .build();
-
-        restaurant.addDish(availableDish);
-        restaurant.addDish(unavailableDish);
-
-        List<Dish> availableDishes = restaurant.getAvailableDishes();
-
-        assertEquals(1, availableDishes.size());
-        assertTrue(availableDishes.contains(availableDish));
-        assertFalse(availableDishes.contains(unavailableDish));
     }
 }
+

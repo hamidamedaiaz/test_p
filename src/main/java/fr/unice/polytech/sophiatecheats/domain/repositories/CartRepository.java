@@ -51,7 +51,4 @@ public interface CartRepository extends Repository<Cart, UUID> {
      * @return true si l'utilisateur a un panier actif
      */
     boolean hasActiveCart(UUID userId);
-
-     void delete(Cart cart);
-
 }

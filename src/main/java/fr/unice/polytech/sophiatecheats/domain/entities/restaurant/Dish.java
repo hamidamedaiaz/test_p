@@ -2,125 +2,76 @@ package fr.unice.polytech.sophiatecheats.domain.entities.restaurant;
 
 import fr.unice.polytech.sophiatecheats.domain.entities.Entity;
 import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
-import fr.unice.polytech.sophiatecheats.domain.enums.DietType;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.DishValidationException;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 /**
  * Entité représentant un plat dans le menu d'un restaurant.
  */
 @Getter
+@Setter
 public class Dish implements Entity<UUID>{
 
     private final UUID id;
     private final String name;
     private final String description;
-    @Setter
     private BigDecimal price;
     private final DishCategory category;
     private boolean available;
-    private final Set<DietType> dietTypes;
-    // Identifiant du restaurant propriétaire du plat (peut être null si non initialisé)
-    private UUID restaurantId;
 
-
-
-    // CONSTRUCTEUR PRIVÉ - Utiliser le Builder pour créer des instances
-    private Dish(Builder builder) {
-        this.id = builder.id;
-        this.name = builder.name;
-        this.description = builder.description;
-        this.price = builder.price;
-        this.category = builder.category;
-        this.available = builder.available;
-        this.dietTypes = new HashSet<>(builder.dietTypes);
-        this.restaurantId = builder.restaurantId;
+    /**
+     * Constructeur complet avec tous les paramètres
+     */
+    public Dish(UUID id, String name, String description, BigDecimal price,
+                DishCategory category, boolean available) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.category = category;
+        this.available = available;
         validate();
     }
 
-    public static Builder builder() {
-        return new Builder();
+    /**
+     * Constructeur principal pour créer un nouveau plat
+     */
+    public Dish(String name, String description, BigDecimal price, DishCategory category) {
+        this(UUID.randomUUID(), name, description, price, category, true);
     }
 
-    public static class Builder {
-        private UUID id = UUID.randomUUID();
-        private String name;
-        private String description;
-        private BigDecimal price;
-        private DishCategory category = DishCategory.MAIN_COURSE;
-        private boolean available = true;
-        private Set<DietType> dietTypes = new HashSet<>();
-        private UUID restaurantId;
-
-        public Builder id(UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder price(BigDecimal price) {
-            this.price = price;
-            return this;
-        }
-
-        public Builder category(DishCategory category) {
-            this.category = category;
-            return this;
-        }
-
-        public Builder available(boolean available) {
-            this.available = available;
-            return this;
-        }
-
-        public Builder dietTypes(Set<DietType> dietTypes) {
-            this.dietTypes = new HashSet<>(dietTypes);
-            return this;
-        }
-
-        public Builder restaurantId(UUID restaurantId) {
-            this.restaurantId = restaurantId;
-            return this;
-        }
-
-        public Builder addDietType(DietType dietType) {
-            this.dietTypes.add(dietType);
-            return this;
-        }
-
-        public Dish build() {
-            return new Dish(this);
-        }
+    /**
+     * Constructeur pour les tests avec disponibilité par défaut et catégorie MAIN_COURSE
+     */
+    public Dish(String name, String description, BigDecimal price) {
+        this(name, description, price, DishCategory.MAIN_COURSE);
     }
+
+    /**
+     * Constructeur avec disponibilité personnalisée
+     */
+    public Dish(String name, String description, BigDecimal price, DishCategory category, boolean available) {
+        this(UUID.randomUUID(), name, description, price, category, available);
+    }
+
 
     public void validate() {
         if (name == null || name.trim().isEmpty()) {
-            throw new DishValidationException("Dish name is required");
+            throw new DishValidationException("Le nom du plat ne peut pas être vide");
         }
-        if (name.length() > 200) {
-            throw new DishValidationException("Le nom du plat ne peut pas dépasser 200 caractères");
+        if (name.length() > 20) {
+            throw new DishValidationException("Le nom du plat ne peut pas dépasser 20  caractères (: je dois verifeir ");
         }
         if (description != null && description.length() > 500) {
             throw new DishValidationException("La description ne peut pas dépasser 500 caractères");
         }
         if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new DishValidationException("Price must be positive or zero");
+            throw new DishValidationException("Le prix du plat doit être positif ou nul");
         }
         if (category == null) {
             throw new DishValidationException("La catégorie du plat doit être définie");
@@ -139,26 +90,6 @@ public class Dish implements Entity<UUID>{
         this.available = false;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    /**
-     * Permet d'initialiser ou mettre à jour l'UUID du restaurant propriétaire du plat.
-     * Utilisé par `Restaurant.addDish` afin que le plat connaisse son restaurant.
-     */
-    public void setRestaurantId(UUID restaurantId) {
-        this.restaurantId = restaurantId;
-    }
-
-    public UUID getRestaurantId() {
-        return restaurantId;
-    }
-
-    @Override
-    public UUID getId() {
-        return id;
-    }
 
 
     @Override
@@ -178,14 +109,6 @@ public class Dish implements Entity<UUID>{
     public String toString() {
         return String.format("Dish{id=%s, name='%s', price=%s, category=%s, available=%s}",
                            id, name, price, category, available);
-    }
-
-    public boolean hasDietType(DietType dietType) {
-        return dietTypes.contains(dietType);
-    }
-
-    public Set<DietType> getDietTypes() {
-        return new HashSet<>(dietTypes);
     }
 
 

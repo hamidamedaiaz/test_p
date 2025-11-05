@@ -23,9 +23,7 @@ public class Order {
     private LocalDateTime orderDateTime;
     private LocalDateTime deliveryTime;
     private PaymentMethod paymentMethod;
-    private UUID deliverySlotId;
-    /** Date/heure de réservation du créneau de livraison */
-    private LocalDateTime deliverySlotReservedAt;
+    private boolean isPaid;  // ✅ NOUVEAU: Indique explicitement si la commande est payée
 
     public Order(User user, Restaurant restaurant, List<OrderItem> orderItems,
                     PaymentMethod paymentMethod) {
@@ -37,9 +35,16 @@ public class Order {
         this.totalAmount= calculateTotalAmount();
         this.orderDateTime=LocalDateTime.now();
         this.paymentMethod=paymentMethod;
-        this.deliverySlotId = null;
+        this.isPaid = false;
     }
 
+    /**
+     * Marque la commande comme payée.
+     * Cette méthode doit être appelée APRÈS que le paiement soit vérifié et traité.
+     */
+    public void markAsPaid() {
+        this.isPaid = true;
+    }
 
    public BigDecimal calculateTotalAmount() {
                    return orderItems.stream()
@@ -47,87 +52,5 @@ public class Order {
                            .reduce(BigDecimal.ZERO, BigDecimal::add);
        }
 
-    /**
-     * Confirme la commande en changeant son statut vers CONFIRMED.
-     * Calcule également le temps de livraison estimé (15 minutes après confirmation).
-     * @throws IllegalStateException si la commande ne peut pas être confirmée
-     */
-    public void confirm() {
-        if (status == OrderStatus.CONFIRMED) {
-            throw new IllegalStateException("La commande est déjà confirmée");
-        }
-        if (status == OrderStatus.EXPIRED) {
-            throw new IllegalStateException("La commande a expiré et ne peut pas être confirmée");
-        }
 
-        this.status = OrderStatus.CONFIRMED;
-        this.deliveryTime = LocalDateTime.now().plusMinutes(15);
-    }
-
-    /**
-     * Vérifie si la commande peut être confirmée.
-     * @return true si la commande peut être confirmée
-     */
-    public boolean canBeConfirmed() {
-        return status == OrderStatus.PENDING || status == OrderStatus.PAID;
-    }
-
-    /**
-     * Marque la commande comme payée.
-     */
-    public void markAsPaid() {
-        if (status == OrderStatus.EXPIRED) {
-            throw new IllegalStateException("La commande a expiré et ne peut pas être payée");
-        }
-        this.status = OrderStatus.PAID;
-    }
-
-    /**
-     * Assigns a delivery slot to this order and reserves it.
-     * This should be called after order creation but before payment processing.
-     */
-    public void assignDeliverySlot(UUID slotId, LocalDateTime slotStartTime) {
-        if (this.deliverySlotId != null) {
-            throw new IllegalStateException("Order already has a delivery slot assigned");
-        }
-        if (slotId == null) {
-            throw new IllegalArgumentException("Slot ID cannot be null");
-        }
-        this.deliverySlotId = slotId;
-        this.deliveryTime = slotStartTime;
-        // NE PAS démarrer le chrono ici !
-    }
-
-    /**
-     * Démarre le timeout de paiement (à appeler quand l'utilisateur passe à l'étape de paiement).
-     */
-    public void startPaymentTimeout() {
-        this.deliverySlotReservedAt = LocalDateTime.now();
-    }
-
-    /**
-     * Vérifie si la commande a un créneau de livraison assigné.
-     */
-    public boolean hasDeliverySlot() {
-        return deliverySlotId != null;
-    }
-
-    /**
-     * Libère le créneau de livraison associé à la commande.
-     */
-    public void releaseDeliverySlot() {
-        this.deliverySlotId = null;
-    }
-
-    /**
-     * Expire la commande et libère le créneau de livraison si besoin.
-     */
-    public void expire() {
-        if (status == OrderStatus.EXPIRED) {
-            throw new IllegalStateException("La commande est déjà expirée");
-        }
-        this.status = OrderStatus.EXPIRED;
-        releaseDeliverySlot();
-    }
-
-}
+   }

@@ -1,7 +1,7 @@
 package fr.unice.polytech.sophiatecheats.application.usecases.cart;
 
-import fr.unice.polytech.sophiatecheats.application.dto.user.CartDetailsResponse;
-import fr.unice.polytech.sophiatecheats.application.dto.user.CartItemDto;
+import fr.unice.polytech.sophiatecheats.application.dto.CartDetailsResponse;
+import fr.unice.polytech.sophiatecheats.application.dto.CartItemDto;
 import fr.unice.polytech.sophiatecheats.application.usecases.UseCase;
 import fr.unice.polytech.sophiatecheats.domain.entities.cart.Cart;
 import fr.unice.polytech.sophiatecheats.domain.entities.cart.CartItem;

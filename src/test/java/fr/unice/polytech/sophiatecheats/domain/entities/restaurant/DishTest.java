@@ -20,13 +20,7 @@ class DishTest {
         DishCategory category = DishCategory.MAIN_COURSE;
 
         // When
-        Dish dish = Dish.builder()
-                .name(name)
-                .description(description)
-                .price(price)
-                .category(category)
-                .available(true)
-                .build();
+        Dish dish = new Dish(UUID.randomUUID(), name, description, price, category, true);
 
         // Then
         assertNotNull(dish.getId());
@@ -47,13 +41,7 @@ class DishTest {
 
         // When & Then
         assertThrows(DishValidationException.class, 
-            () -> Dish.builder()
-                    .name(name)
-                    .description(description)
-                    .price(price)
-                    .category(category)
-                    .available(true)
-                    .build());
+            () -> new Dish(UUID.randomUUID(), name, description, price, category, true));
     }
 
     @Test
@@ -66,13 +54,7 @@ class DishTest {
 
         // When & Then
         assertThrows(DishValidationException.class, 
-            () -> Dish.builder()
-                    .name(name)
-                    .description(description)
-                    .price(price)
-                    .category(category)
-                    .available(true)
-                    .build());
+            () -> new Dish(UUID.randomUUID(), name, description, price, category, true));
     }
 
     @Test
@@ -85,13 +67,7 @@ class DishTest {
 
         // When & Then
         assertThrows(DishValidationException.class, 
-            () -> Dish.builder()
-                    .name(name)
-                    .description(description)
-                    .price(price)
-                    .category(category)
-                    .available(true)
-                    .build());
+            () -> new Dish(UUID.randomUUID(), name, description, price, category, true));
     }
 
     @Test
@@ -104,13 +80,7 @@ class DishTest {
 
         // When & Then
         assertThrows(DishValidationException.class, 
-            () -> Dish.builder()
-                    .name(name)
-                    .description(description)
-                    .price(price)
-                    .category(category)
-                    .available(true)
-                    .build());
+            () -> new Dish(UUID.randomUUID(), name, description, price, category, true));
     }
 
     @Test
@@ -122,25 +92,13 @@ class DishTest {
         DishCategory category = DishCategory.STARTER;
 
         // When & Then
-        assertDoesNotThrow(() -> Dish.builder()
-                .name(name)
-                .description(description)
-                .price(price)
-                .category(category)
-                .available(true)
-                .build());
+        assertDoesNotThrow(() -> new Dish(UUID.randomUUID(), name, description, price, category, true));
     }
 
     @Test
     void should_make_dish_available_and_unavailable() {
         // Given
-        Dish dish = Dish.builder()
-                .name("Test")
-                .description("Test")
-                .price(new BigDecimal("10"))
-                .category(DishCategory.MAIN_COURSE)
-                .available(true)
-                .build();
+        Dish dish = new Dish(UUID.randomUUID(), "Test", "Test", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
         assertTrue(dish.isAvailable());
 
         // When
@@ -160,22 +118,8 @@ class DishTest {
     void should_have_consistent_equals_and_hashcode() {
         // Given
         UUID id = UUID.randomUUID();
-        Dish dish1 = Dish.builder()
-                .id(id)
-                .name("Test")
-                .description("Test")
-                .price(new BigDecimal("10"))
-                .category(DishCategory.MAIN_COURSE)
-                .available(true)
-                .build();
-        Dish dish2 = Dish.builder()
-                .id(id)
-                .name("Different Name")
-                .description("Different")
-                .price(new BigDecimal("20"))
-                .category(DishCategory.DESSERT)
-                .available(false)
-                .build();
+        Dish dish1 = new Dish(id, "Test", "Test", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
+        Dish dish2 = new Dish(id, "Different Name", "Different", new BigDecimal("20"), DishCategory.DESSERT, false);
 
         // Then
         assertEquals(dish1, dish2); // Same ID
@@ -193,14 +137,7 @@ class DishTest {
         boolean available = false;
 
         // When
-        Dish dish = Dish.builder()
-                .id(id)
-                .name(name)
-                .description(description)
-                .price(price)
-                .category(category)
-                .available(available)
-                .build();
+        Dish dish = new Dish(id, name, description, price, category, available);
 
         // Then
         assertEquals(id, dish.getId());
@@ -214,14 +151,8 @@ class DishTest {
     @Test
     void should_have_meaningful_toString() {
         // Given
-        Dish dish = Dish.builder()
-                .name("Test Dish")
-                .description("Description")
-                .price(new BigDecimal("15.99"))
-                .category(DishCategory.DESSERT)
-                .available(true)
-                .build();
-
+        Dish dish = new Dish(UUID.randomUUID(), "Test Dish", "Description", new BigDecimal("15.99"), DishCategory.DESSERT, true);
+        
         // When
         String result = dish.toString();
         
@@ -242,13 +173,7 @@ class DishTest {
         DishCategory category = DishCategory.MAIN_COURSE;
 
         // When & Then - Should not throw exception
-        assertDoesNotThrow(() -> Dish.builder()
-                .name(name)
-                .description(description)
-                .price(price)
-                .category(category)
-                .available(true)
-                .build());
+        assertDoesNotThrow(() -> new Dish(UUID.randomUUID(), name, description, price, category, true));
     }
 
     @Test
@@ -261,35 +186,17 @@ class DishTest {
 
         // When & Then
         assertThrows(DishValidationException.class, 
-            () -> Dish.builder()
-                    .name(name)
-                    .description(description)
-                    .price(price)
-                    .category(category)
-                    .available(true)
-                    .build());
+            () -> new Dish(UUID.randomUUID(), name, description, price, category, true));
     }
 
     @Test
     void should_not_equal_different_objects() {
         // Given
-        Dish dish = Dish.builder()
-                .name("Test")
-                .description("Test")
-                .price(new BigDecimal("10"))
-                .category(DishCategory.MAIN_COURSE)
-                .available(true)
-                .build();
-
+        Dish dish = new Dish(UUID.randomUUID(), "Test", "Test", new BigDecimal("10"), DishCategory.MAIN_COURSE, true);
+        
         // Then
         assertNotEquals(dish, null);
         assertNotEquals(dish, "not a dish");
-        assertNotEquals(dish, Dish.builder()
-                .name("Other")
-                .description("Other")
-                .price(new BigDecimal("20"))
-                .category(DishCategory.DESSERT)
-                .available(true)
-                .build());
+        assertNotEquals(dish, new Dish(UUID.randomUUID(), "Other", "Other", new BigDecimal("20"), DishCategory.DESSERT, true));
     }
 }

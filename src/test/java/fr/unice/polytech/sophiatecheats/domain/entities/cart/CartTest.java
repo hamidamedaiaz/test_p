@@ -2,10 +2,8 @@ package fr.unice.polytech.sophiatecheats.domain.entities.cart;
 
 import fr.unice.polytech.sophiatecheats.domain.entities.restaurant.Dish;
 import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
-import fr.unice.polytech.sophiatecheats.domain.exceptions.CannotMixRestaurantsException;
 import fr.unice.polytech.sophiatecheats.domain.exceptions.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -13,162 +11,149 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Tests unitaires pour l'entité Cart avec la règle métier
- * "Un panier ne peut contenir que des plats d'un seul restaurant".
- */
 class CartTest {
-
     private Cart cart;
     private UUID userId;
-    private UUID restaurant1Id;
-    private UUID restaurant2Id;
-    private Dish pizzaFromRestaurant1;
-    private Dish burgerFromRestaurant2;
-    private Dish tiramisuFromRestaurant1;
+    private Dish dish1;
+    private Dish dish2;
 
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        restaurant1Id = UUID.randomUUID();
-        restaurant2Id = UUID.randomUUID();
-
         cart = new Cart(userId);
 
-        pizzaFromRestaurant1 = Dish.builder()
-                .name("Pizza Margherita")
-                .description("Delicious pizza")
-                .price(BigDecimal.valueOf(12.50))
-                .category(DishCategory.MAIN_COURSE)
-                .available(true)
-                .build();
-
-        burgerFromRestaurant2 = Dish.builder()
-                .name("Burger Bio")
-                .description("Organic burger")
-                .price(BigDecimal.valueOf(15.00))
-                .category(DishCategory.MAIN_COURSE)
-                .available(true)
-                .build();
-
-        tiramisuFromRestaurant1 = Dish.builder()
-                .name("Tiramisu")
-                .description("Italian dessert")
-                .price(BigDecimal.valueOf(6.50))
-                .category(DishCategory.DESSERT)
-                .available(true)
-                .build();
+        // Création de plats pour les tests
+        dish1 = new Dish("Pizza", "Description 1", BigDecimal.valueOf(10.0), DishCategory.MAIN_COURSE);
+        dish2 = new Dish("Pasta", "Description 2", BigDecimal.valueOf(8.0), DishCategory.MAIN_COURSE);
     }
 
     @Test
-    @DisplayName("Un panier vide n'a pas de restaurant associé")
-    void emptyCartHasNoRestaurant() {
-        assertNull(cart.getRestaurantId(), "Le panier vide ne devrait avoir aucun restaurant");
+    void should_create_empty_cart() {
+        assertNotNull(cart.getId());
+        assertEquals(userId, cart.getUserId());
+        assertTrue(cart.getItems().isEmpty());
+        assertEquals(BigDecimal.ZERO, cart.calculateTotal());
+        assertEquals(0, cart.getTotalItems());
         assertTrue(cart.isEmpty());
     }
 
     @Test
-    @DisplayName("Ajouter un plat à un panier vide définit le restaurant du panier")
-    void addingFirstDishSetsRestaurantId() {
-        cart.addDish(pizzaFromRestaurant1, 1, restaurant1Id);
-
-        assertNotNull(cart.getRestaurantId());
-        assertEquals(restaurant1Id, cart.getRestaurantId());
-        assertEquals(1, cart.getTotalItems());
+    void should_throw_exception_when_creating_cart_with_null_userId() {
+        assertThrows(ValidationException.class, () -> new Cart(null));
     }
 
     @Test
-    @DisplayName("Peut ajouter plusieurs plats du même restaurant")
-    void canAddMultipleDishesFromSameRestaurant() {
-        cart.addDish(pizzaFromRestaurant1, 1, restaurant1Id);
-        cart.addDish(tiramisuFromRestaurant1, 1, restaurant1Id);
+    void should_add_dish_to_cart() {
+        cart.addDish(dish1, 2);
 
-        assertEquals(restaurant1Id, cart.getRestaurantId());
+        assertEquals(1, cart.getItems().size());
         assertEquals(2, cart.getTotalItems());
+        assertEquals(BigDecimal.valueOf(20.0), cart.calculateTotal());
+        assertFalse(cart.isEmpty());
     }
 
     @Test
-    @DisplayName("Ne peut PAS ajouter un plat d'un restaurant différent")
-    void cannotAddDishFromDifferentRestaurant() {
-        // Ajouter d'abord un plat du restaurant 1
-        cart.addDish(pizzaFromRestaurant1, 1, restaurant1Id);
+    void should_update_quantity_when_adding_existing_dish() {
+        cart.addDish(dish1, 2);
+        cart.addDish(dish1, 3);
 
-        // Essayer d'ajouter un plat du restaurant 2
-        CannotMixRestaurantsException exception = assertThrows(
-                CannotMixRestaurantsException.class,
-                () -> cart.addDish(burgerFromRestaurant2, 1, restaurant2Id)
-        );
-
-        assertEquals("CANNOT_MIX_RESTAURANTS", exception.getErrorCode());
-        assertEquals(1, cart.getTotalItems(), "Le panier devrait toujours contenir 1 seul plat");
-        assertEquals(restaurant1Id, cart.getRestaurantId(), "Le restaurant du panier ne devrait pas changer");
+        assertEquals(1, cart.getItems().size());
+        assertEquals(5, cart.getTotalItems());
+        assertEquals(BigDecimal.valueOf(50.0), cart.calculateTotal());
     }
 
     @Test
-    @DisplayName("Vider le panier réinitialise le restaurant")
-    void clearingCartResetsRestaurant() {
-        cart.addDish(pizzaFromRestaurant1, 1, restaurant1Id);
-        assertEquals(restaurant1Id, cart.getRestaurantId());
+    void should_add_multiple_different_dishes() {
+        cart.addDish(dish1, 2);
+        cart.addDish(dish2, 1);
 
-        cart.clear();
+        assertEquals(2, cart.getItems().size());
+        assertEquals(3, cart.getTotalItems());
+        assertEquals(BigDecimal.valueOf(28.0), cart.calculateTotal());
+    }
 
-        assertNull(cart.getRestaurantId(), "Le restaurant devrait être réinitialisé");
+    @Test
+    void should_update_dish_quantity() {
+        cart.addDish(dish1, 2);
+        cart.updateQuantity(dish1.getId(), 4);
+
+        assertEquals(1, cart.getItems().size());
+        assertEquals(4, cart.getTotalItems());
+        assertEquals(BigDecimal.valueOf(40.0), cart.calculateTotal());
+    }
+
+    @Test
+    void should_remove_dish_when_updating_quantity_to_zero() {
+        cart.addDish(dish1, 2);
+        cart.updateQuantity(dish1.getId(), 0);
+
         assertTrue(cart.isEmpty());
+        assertEquals(0, cart.getTotalItems());
+        assertEquals(BigDecimal.ZERO, cart.calculateTotal());
     }
 
     @Test
-    @DisplayName("Après avoir vidé le panier, peut ajouter un plat d'un autre restaurant")
-    void afterClearingCanAddDishFromAnotherRestaurant() {
-        // Ajouter pizza du restaurant 1
-        cart.addDish(pizzaFromRestaurant1, 1, restaurant1Id);
-        assertEquals(restaurant1Id, cart.getRestaurantId());
+    void should_remove_dish() {
+        cart.addDish(dish1, 2);
+        cart.addDish(dish2, 1);
+        cart.removeDish(dish1.getId());
 
-        // Vider le panier
-        cart.clear();
-
-        // Ajouter burger du restaurant 2 (devrait fonctionner)
-        cart.addDish(burgerFromRestaurant2, 1, restaurant2Id);
-
-        assertEquals(restaurant2Id, cart.getRestaurantId());
+        assertEquals(1, cart.getItems().size());
         assertEquals(1, cart.getTotalItems());
+        assertEquals(BigDecimal.valueOf(8.0), cart.calculateTotal());
     }
 
     @Test
-    @DisplayName("Supprimer tous les plats réinitialise le restaurant")
-    void removingAllItemsResetsRestaurant() {
-        cart.addDish(pizzaFromRestaurant1, 2, restaurant1Id);
+    void should_clear_cart() {
+        cart.addDish(dish1, 2);
+        cart.addDish(dish2, 1);
+        cart.clear();
 
-        cart.removeDish(pizzaFromRestaurant1.getId());
-
-        assertNull(cart.getRestaurantId(), "Le restaurant devrait être réinitialisé");
         assertTrue(cart.isEmpty());
+        assertEquals(0, cart.getTotalItems());
+        assertEquals(BigDecimal.ZERO, cart.calculateTotal());
     }
 
     @Test
-    @DisplayName("belongsToRestaurant retourne true pour le bon restaurant")
-    void belongsToRestaurantReturnsTrueForCorrectRestaurant() {
-        cart.addDish(pizzaFromRestaurant1, 1, restaurant1Id);
-
-        assertTrue(cart.belongsToRestaurant(restaurant1Id));
-        assertFalse(cart.belongsToRestaurant(restaurant2Id));
+    void should_throw_exception_when_adding_null_dish() {
+        assertThrows(ValidationException.class, () -> cart.addDish(null, 1));
     }
 
     @Test
-    @DisplayName("Lève une exception si restaurantId est null lors de l'ajout")
-    void throwsExceptionIfRestaurantIdIsNull() {
-        assertThrows(
-                ValidationException.class,
-                () -> cart.addDish(pizzaFromRestaurant1, 1, null)
-        );
+    void should_throw_exception_when_adding_unavailable_dish() {
+        dish1.makeUnavailable();
+        assertThrows(ValidationException.class, () -> cart.addDish(dish1, 1));
     }
 
     @Test
-    @DisplayName("Peut augmenter la quantité d'un plat existant")
-    void canIncreaseQuantityOfExistingDish() {
-        cart.addDish(pizzaFromRestaurant1, 1, restaurant1Id);
-        cart.addDish(pizzaFromRestaurant1, 2, restaurant1Id);
+    void should_throw_exception_when_adding_negative_quantity() {
+        assertThrows(ValidationException.class, () -> cart.addDish(dish1, -1));
+    }
 
-        assertEquals(1, cart.getItems().size(), "Devrait avoir 1 type de plat");
-        assertEquals(3, cart.getTotalItems(), "Devrait avoir 3 pizzas au total");
+    @Test
+    void should_throw_exception_when_adding_zero_quantity() {
+        assertThrows(ValidationException.class, () -> cart.addDish(dish1, 0));
+    }
+
+    @Test
+    void should_throw_exception_when_exceeding_max_quantity() {
+        assertThrows(ValidationException.class, () -> cart.addDish(dish1, 11));
+    }
+
+    @Test
+    void should_throw_exception_when_updating_nonexistent_dish() {
+        assertThrows(ValidationException.class, () -> cart.updateQuantity(UUID.randomUUID(), 1));
+    }
+
+    @Test
+    void should_throw_exception_when_updating_with_invalid_quantity() {
+        cart.addDish(dish1, 1);
+        assertThrows(ValidationException.class, () -> cart.updateQuantity(dish1.getId(), 11));
+    }
+
+    @Test
+    void should_return_immutable_item_list() {
+        cart.addDish(dish1, 1);
+        assertThrows(UnsupportedOperationException.class, () -> cart.getItems().add(new CartItem(dish2, 1)));
     }
 }

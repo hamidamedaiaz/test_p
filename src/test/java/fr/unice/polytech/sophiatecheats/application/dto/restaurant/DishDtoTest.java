@@ -1,11 +1,9 @@
 package fr.unice.polytech.sophiatecheats.application.dto.restaurant;
 
-import fr.unice.polytech.sophiatecheats.application.dto.restaurant.management.DishDto;
 import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,8 +19,7 @@ class DishDtoTest {
             "Delicious pizza",
             new BigDecimal("12.50"),
             DishCategory.MAIN_COURSE,
-            true,
-            new HashSet<>()
+            true
         );
 
         // When & Then
@@ -38,8 +35,7 @@ class DishDtoTest {
             "Delicious pizza",
             new BigDecimal("12.50"),
             DishCategory.MAIN_COURSE,
-            true,
-            new HashSet<>()
+            true
         );
 
         // When & Then
@@ -55,8 +51,7 @@ class DishDtoTest {
             "Delicious pizza",
             new BigDecimal("12.50"),
             DishCategory.MAIN_COURSE,
-            true,
-            new HashSet<>()
+            true
         );
 
         // When & Then
@@ -72,8 +67,7 @@ class DishDtoTest {
             "Delicious pizza",
             new BigDecimal("12.50"),
             DishCategory.MAIN_COURSE,
-            true,
-            new HashSet<>()
+            true
         );
 
         // When & Then
@@ -89,8 +83,7 @@ class DishDtoTest {
             null, // null description
             new BigDecimal("12.50"),
             DishCategory.MAIN_COURSE,
-            true,
-            new HashSet<>()
+            true
         );
 
         // When & Then
@@ -106,8 +99,7 @@ class DishDtoTest {
             "   ", // empty/whitespace description
             new BigDecimal("12.50"),
             DishCategory.MAIN_COURSE,
-            true,
-            new HashSet<>()
+            true
         );
 
         // When & Then
@@ -123,8 +115,7 @@ class DishDtoTest {
             "Delicious pizza",
             null, // null price
             DishCategory.MAIN_COURSE,
-            true,
-            new HashSet<>()
+            true
         );
 
         // When & Then
@@ -140,8 +131,7 @@ class DishDtoTest {
             "Delicious pizza",
             new BigDecimal("-5.00"), // negative price
             DishCategory.MAIN_COURSE,
-            true,
-            new HashSet<>()
+            true
         );
 
         // When & Then
@@ -157,8 +147,7 @@ class DishDtoTest {
             "Free sample dish",
             BigDecimal.ZERO, // zero price
             DishCategory.STARTER,
-            true,
-            new HashSet<>()
+            true
         );
 
         // When & Then
@@ -174,8 +163,7 @@ class DishDtoTest {
             "Delicious pizza",
             new BigDecimal("12.50"),
             null, // null category
-            true,
-            new HashSet<>()
+            true
         );
 
         // When & Then
@@ -191,8 +179,7 @@ class DishDtoTest {
             "Currently unavailable",
             new BigDecimal("15.00"),
             DishCategory.DESSERT,
-            false, // unavailable
-            new HashSet<>()
+            false // unavailable
         );
 
         // When & Then
@@ -210,12 +197,11 @@ class DishDtoTest {
                 "Test description",
                 new BigDecimal("10.00"),
                 category,
-                true,
-                new HashSet<>()
+                true
             );
 
             // When & Then
-            assertTrue(dto.isValid(), "Should validate for category: " + category);
+            assertTrue(dto.isValid(), "Should be valid for category " + category);
         }
     }
 }

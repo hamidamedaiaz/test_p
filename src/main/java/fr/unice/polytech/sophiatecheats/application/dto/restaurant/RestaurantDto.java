@@ -1,7 +1,6 @@
 package fr.unice.polytech.sophiatecheats.application.dto.restaurant;
 
 import fr.unice.polytech.sophiatecheats.application.dto.DTO;
-import fr.unice.polytech.sophiatecheats.application.dto.restaurant.management.DishDto;
 
 import java.time.LocalTime;
 import java.util.List;

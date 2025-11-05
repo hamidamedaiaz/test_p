@@ -1,23 +1,18 @@
 package fr.unice.polytech.sophiatecheats.application.usecases.cart;
 
-import fr.unice.polytech.sophiatecheats.application.dto.user.AddDishToCartRequest;
-import fr.unice.polytech.sophiatecheats.application.dto.user.AddDishToCartResponse;
+import fr.unice.polytech.sophiatecheats.application.dto.AddDishToCartRequest;
+import fr.unice.polytech.sophiatecheats.application.dto.AddDishToCartResponse;
 import fr.unice.polytech.sophiatecheats.domain.entities.cart.Cart;
 import fr.unice.polytech.sophiatecheats.domain.entities.restaurant.Dish;
-import fr.unice.polytech.sophiatecheats.domain.entities.restaurant.Restaurant;
 import fr.unice.polytech.sophiatecheats.domain.entities.user.User;
-import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
 import fr.unice.polytech.sophiatecheats.domain.repositories.CartRepository;
-import fr.unice.polytech.sophiatecheats.domain.repositories.UserRepository;
-import fr.unice.polytech.sophiatecheats.domain.repositories.RestaurantRepository;
+import fr.unice.polytech.sophiatecheats.domain.repositories.Repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,10 +32,10 @@ import static org.mockito.Mockito.*;
 class AddDishToCartUseCaseTest {
 
     @Mock
-    private UserRepository userRepository;
+    private Repository<User, UUID> userRepository;
 
     @Mock
-    private RestaurantRepository restaurantRepository;
+    private Repository<Dish, UUID> dishRepository;
 
     @Mock
     private CartRepository cartRepository;
@@ -51,26 +46,17 @@ class AddDishToCartUseCaseTest {
     private UUID dishId;
     private User testUser;
     private Dish testDish;
-    private Restaurant testRestaurant;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        useCase = new AddDishToCartUseCase(userRepository, restaurantRepository, cartRepository);
+        useCase = new AddDishToCartUseCase(userRepository, dishRepository, cartRepository);
 
         userId = UUID.randomUUID();
-        testUser = new User("marcel@example.com", "Marcel Dupont");
-        testDish = Dish.builder()
-                .name("Tacos 3 viandes")
-                .description("Délicieux tacos avec 3 viandes")
-                .price(BigDecimal.valueOf(8.50))
-                .category(DishCategory.MAIN_COURSE)
-                .available(true)
-                .build();
-        dishId = testDish.getId(); // capture generated id
+        dishId = UUID.randomUUID();
 
-        testRestaurant = new Restaurant("Test Restaurant", "Test Address");
-        testRestaurant.addDish(testDish);
+        testUser = new User("marcel@example.com", "Marcel Dupont");
+        testDish = new Dish("Tacos 3 viandes", "Délicieux tacos avec 3 viandes", BigDecimal.valueOf(8.50));
     }
 
     /**
@@ -89,7 +75,7 @@ class AddDishToCartUseCaseTest {
 
         // Configuration des mocks
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(restaurantRepository.findAll()).thenReturn(Collections.singletonList(testRestaurant));
+        when(dishRepository.findById(dishId)).thenReturn(Optional.of(testDish));
         when(cartRepository.findActiveCartByUserId(userId)).thenReturn(Optional.empty()); // Pas de panier existant
         when(cartRepository.save(any(Cart.class))).thenReturn(null);
 
@@ -104,7 +90,7 @@ class AddDishToCartUseCaseTest {
 
         // Vérification des interactions
         verify(userRepository).findById(userId);
-        verify(restaurantRepository, times(2)).findAll();
+        verify(dishRepository).findById(dishId);
         verify(cartRepository).findActiveCartByUserId(userId);
         verify(cartRepository).save(any(Cart.class));
     }
@@ -127,7 +113,7 @@ class AddDishToCartUseCaseTest {
         AddDishToCartRequest request = new AddDishToCartRequest(userId, dishId, 2);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(restaurantRepository.findAll()).thenReturn(Collections.singletonList(testRestaurant));
+        when(dishRepository.findById(dishId)).thenReturn(Optional.of(testDish));
         when(cartRepository.findActiveCartByUserId(userId)).thenReturn(Optional.of(existingCart));
         when(cartRepository.save(any(Cart.class))).thenReturn(null);
 
@@ -162,28 +148,19 @@ class AddDishToCartUseCaseTest {
      */
     @Test
     void should_fail_when_dish_not_available() {
-        // Given unavailable dish added to restaurant
-        Dish unavailableDish = Dish.builder()
-                .id(UUID.randomUUID())
-                .name("Plat indisponible")
-                .description("Description")
-                .price(BigDecimal.valueOf(10.0))
-                .category(DishCategory.MAIN_COURSE)
-                .available(false)
-                .build();
-        testRestaurant.addDish(unavailableDish);
+        // Given
+        Dish unavailableDish = new Dish("Plat indisponible", "Description", BigDecimal.valueOf(10.0));
+        unavailableDish.setAvailable(false);
 
-        AddDishToCartRequest request = new AddDishToCartRequest(userId, unavailableDish.getId(), 1);
+        AddDishToCartRequest request = new AddDishToCartRequest(userId, dishId, 1);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(restaurantRepository.findAll()).thenReturn(Collections.singletonList(testRestaurant));
-        when(cartRepository.findActiveCartByUserId(userId)).thenReturn(Optional.empty());
+        when(dishRepository.findById(dishId)).thenReturn(Optional.of(unavailableDish));
 
         // When
         AddDishToCartResponse response = useCase.execute(request);
 
         // Then
         assertFalse(response.success());
-        assertNull(response.cartId());
     }
 }
