@@ -10,6 +10,7 @@ import java.util.UUID;
 @Getter
 public class CartItem {
 
+    private final Dish dish;
     private final UUID dishId;
     private final String dishName;
     private final String dishDescription;
@@ -23,6 +24,7 @@ public class CartItem {
 
         validateQuantity(quantity);
 
+        this.dish = dish;
         this.dishId = dish.getId();
         this.dishName = dish.getName();
         this.dishDescription = dish.getDescription();

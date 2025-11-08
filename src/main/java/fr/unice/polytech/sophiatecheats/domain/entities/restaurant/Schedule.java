@@ -1,58 +1,44 @@
 package fr.unice.polytech.sophiatecheats.domain.entities.restaurant;
-import lombok.Getter;
-import lombok.Setter;
+
+import fr.unice.polytech.sophiatecheats.domain.exceptions.RestaurantValidationException;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
+public record Schedule(LocalTime openingTime, LocalTime closingTime) {
 
-@Getter
-@Setter
-public class Schedule {
-
-    private final LocalTime openingTime;
-    private final LocalTime closingTime;
-    private final List<TimeSlot> timeslots = new ArrayList<>();
-    private int slotCapacity;
-
-    public Schedule(LocalTime openingTime, LocalTime closingTime, int slotCapacity) {
+    public Schedule(LocalTime openingTime, LocalTime closingTime) {
         this.openingTime = openingTime;
         this.closingTime = closingTime;
-        this.slotCapacity = slotCapacity;
-    }
-    public void setCapacity(int slotCapacity) {
-        this.slotCapacity = slotCapacity;
+        validate();
     }
 
-    public LocalTime getOpeningTime() {
-        return openingTime;
+    public static Schedule defaultSchedule() {
+        return new Schedule(LocalTime.of(9, 0), LocalTime.of(22, 0));
     }
 
-    public static LocalTime parseTime(String time) {
-        return LocalTime.parse(time);
+    private void validate() {
+        if (openingTime != null && closingTime != null && openingTime.isAfter(closingTime)) {
+            throw new RestaurantValidationException("L'heure d'ouverture ne peut pas être après l'heure de fermeture");
+        }
     }
 
-    public List<TimeSlot> getTimeSlots() {
-        return timeslots;
+    public boolean isOpenAt(LocalTime time) {
+        if (time == null || openingTime == null || closingTime == null) {
+            return false;
+        }
+        return !time.isBefore(openingTime) && !time.isAfter(closingTime);
     }
 
-    public Optional<TimeSlot> findTimeSlotByStartTime(LocalDateTime startTime) {
-        return timeslots.stream()
-                .filter(slot -> slot.getStartTime().equals(startTime))
-                .findFirst();
-    }
-    public void addTimeslot(TimeSlot timeslot) {
-        timeslots.add(timeslot);
+    public boolean isOpenAt(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return false;
+        }
+        return isOpenAt(dateTime.toLocalTime());
     }
 
-    public int getMaxCapacity() {
-        return slotCapacity;
-    }
-
-    public LocalTime getClosingTime() {
-        return this.closingTime;
+    @Override
+    public String toString() {
+        return String.format("Schedule{openingTime=%s, closingTime=%s}", openingTime, closingTime);
     }
 }

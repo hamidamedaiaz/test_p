@@ -5,5 +5,5 @@ package fr.unice.polytech.sophiatecheats.domain.enums;
  */
 public enum OrderStatus {
 
-    CREATED, PENDING, CONFIRMED, PAID, EXPIRED,DELIVERED
+    CREATED, PENDING, PREPARING , CONFIRMED, PAID, EXPIRED
 }

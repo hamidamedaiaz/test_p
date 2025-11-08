@@ -19,14 +19,13 @@ class CartItemTest {
 
     @BeforeEach
     void setUp() {
-        testDish = new Dish(
-            UUID.randomUUID(),
-            "Pizza Margherita",
-            "Traditional Italian pizza",
-            new BigDecimal("12.50"),
-            DishCategory.MAIN_COURSE, // Correct parameter order: category comes 5th
-            true // available status comes 6th
-        );
+        testDish = Dish.builder()
+            .name("Pizza Margherita")
+            .description("Traditional Italian pizza")
+            .price(new BigDecimal("12.50"))
+            .category(DishCategory.MAIN_COURSE)
+            .available(true)
+            .build();
     }
 
     @Test

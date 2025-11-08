@@ -1,7 +1,8 @@
 package fr.unice.polytech.sophiatecheats.application.usecases.restaurant;
 
-import fr.unice.polytech.sophiatecheats.application.dto.restaurant.BrowseRestaurantsRequest;
-import fr.unice.polytech.sophiatecheats.application.dto.restaurant.BrowseRestaurantsResponse;
+import fr.unice.polytech.sophiatecheats.application.dto.user.request.BrowseRestaurantsRequest;
+import fr.unice.polytech.sophiatecheats.application.dto.user.response.BrowseRestaurantsResponse;
+import fr.unice.polytech.sophiatecheats.application.usecases.user.BrowseRestaurantsUseCase;
 import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
 import fr.unice.polytech.sophiatecheats.infrastructure.config.ApplicationConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +24,7 @@ class BrowseRestaurantsUseCaseTest {
     @Test
     void should_return_all_restaurants_when_no_filters() {
         // Given
-        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(null, null);
+        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(null, null, null, null, null, null);
 
         // When
         BrowseRestaurantsResponse response = useCase.execute(request);
@@ -45,7 +46,7 @@ class BrowseRestaurantsUseCaseTest {
     @Test
     void should_filter_by_availability_open_only() {
         // Given
-        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(null, true);
+        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(null, true, null, null, null, null);
 
         // When
         BrowseRestaurantsResponse response = useCase.execute(request);
@@ -66,7 +67,7 @@ class BrowseRestaurantsUseCaseTest {
     @Test
     void should_filter_by_dish_category() {
         // Given
-        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(DishCategory.VEGETARIAN, null);
+        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(DishCategory.VEGETARIAN, null, null, null, null, null);
 
         // When
         BrowseRestaurantsResponse response = useCase.execute(request);
@@ -82,7 +83,7 @@ class BrowseRestaurantsUseCaseTest {
     @Test
     void should_filter_by_both_availability_and_category() {
         // Given - Look for open restaurants with main courses
-        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(DishCategory.MAIN_COURSE, true);
+        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(DishCategory.MAIN_COURSE, true, null, null, null, null);
 
         // When
         BrowseRestaurantsResponse response = useCase.execute(request);
@@ -102,7 +103,7 @@ class BrowseRestaurantsUseCaseTest {
     @Test
     void should_return_empty_list_when_no_matches() {
         // Given - Look for a category that doesn't exist in sample data
-        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(DishCategory.STARTER, null);
+        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(DishCategory.STARTER, null, null, null, null, null);
 
         // When
         BrowseRestaurantsResponse response = useCase.execute(request);
@@ -125,7 +126,7 @@ class BrowseRestaurantsUseCaseTest {
     @Test
     void should_return_only_available_dishes_in_response() {
         // Given
-        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(null, null);
+        BrowseRestaurantsRequest request = new BrowseRestaurantsRequest(null, null, null, null, null, null);
 
         // When
         BrowseRestaurantsResponse response = useCase.execute(request);

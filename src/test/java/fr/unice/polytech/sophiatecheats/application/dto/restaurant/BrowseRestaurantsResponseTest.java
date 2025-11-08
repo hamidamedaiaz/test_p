@@ -1,9 +1,12 @@
 package fr.unice.polytech.sophiatecheats.application.dto.restaurant;
 
+import fr.unice.polytech.sophiatecheats.application.dto.restaurant.dishManagement.DishDto;
+import fr.unice.polytech.sophiatecheats.application.dto.user.response.BrowseRestaurantsResponse;
 import fr.unice.polytech.sophiatecheats.domain.enums.DishCategory;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -95,7 +98,8 @@ class BrowseRestaurantsResponseTest {
             "Description",
             new BigDecimal("10.00"),
             DishCategory.MAIN_COURSE,
-            true
+            true,
+            new HashSet<>()
         );
         
         RestaurantDto restaurant = new RestaurantDto(
